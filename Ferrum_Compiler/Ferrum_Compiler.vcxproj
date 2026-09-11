@@ -71,6 +71,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md" />
+    <None Include="functions.fe" />
+    <None Include="operators.fe" />
+    <None Include="scopes.fe" />
+    <None Include="variables.fe" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

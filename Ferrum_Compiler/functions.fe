@@ -1,0 +1,6 @@
+int: Add[int: a, int: b]
+{
+    a + b
+}
+
+Add[3, 5]

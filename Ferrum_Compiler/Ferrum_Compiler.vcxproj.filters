@@ -19,6 +19,9 @@
     <Filter Include="Header Files\AST">
       <UniqueIdentifier>{c0b3e8dc-0475-4455-9245-449eb0ea5c44}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Examples">
+      <UniqueIdentifier>{08006f77-a7f0-4959-b1e4-37bc45b2f263}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Error.h">
@@ -143,5 +146,17 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md" />
+    <None Include="variables.fe">
+      <Filter>Examples</Filter>
+    </None>
+    <None Include="operators.fe">
+      <Filter>Examples</Filter>
+    </None>
+    <None Include="functions.fe">
+      <Filter>Examples</Filter>
+    </None>
+    <None Include="scopes.fe">
+      <Filter>Examples</Filter>
+    </None>
   </ItemGroup>
 </Project>
