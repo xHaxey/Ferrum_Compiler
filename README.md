@@ -34,3 +34,8 @@ How to use:
 ./ferrum_compiler [project_dir] [fileNames]
 
 After successful compilation .obj and .exe files will be in [project_dir]/build.
+
+Ferrum uses LLVM and Clang.
+
+LLVM Project is licensed under
+Apache License 2.0 with LLVM Exceptions.
