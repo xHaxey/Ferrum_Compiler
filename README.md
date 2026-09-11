@@ -29,3 +29,8 @@ Near future:
 - If expressions
 - Loops
 
+How to use:
+
+./ferrum_compiler [project_dir] [fileNames]
+
+After successful compilation .obj and .exe files will be in [project_dir]/build.
