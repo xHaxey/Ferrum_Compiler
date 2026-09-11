@@ -114,11 +114,11 @@ void Program::PackToExe(std::filesystem::path outputDir, std::string projectName
 
     std::cout << "Current path:" << std::filesystem::current_path() << std::endl;
 
-    auto clangPath = root / "clang/";
+    auto clangPath = root;
 
     auto exePath = outputDir / (projectName + ".exe");
 
-    auto exeCommand = clangPath.generic_string() + "clang++.exe " + objPath.generic_string() + " -o " + exePath.generic_string();
+    auto exeCommand = clangPath.generic_string() + "/clang++.exe " + objPath.generic_string() + " -o " + exePath.generic_string();
 
     system(exeCommand.c_str());
 
