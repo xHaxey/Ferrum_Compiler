@@ -146,16 +146,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md" />
-    <None Include="variables.fe">
+    <None Include="examples\functions.fe">
       <Filter>Examples</Filter>
     </None>
-    <None Include="operators.fe">
+    <None Include="examples\operators.fe">
       <Filter>Examples</Filter>
     </None>
-    <None Include="functions.fe">
+    <None Include="examples\scopes.fe">
       <Filter>Examples</Filter>
     </None>
-    <None Include="scopes.fe">
+    <None Include="examples\variables.fe">
       <Filter>Examples</Filter>
     </None>
   </ItemGroup>

@@ -1,7 +1,11 @@
-int: x = 5
 
+int: main[]
 {
-    int: x = 10
+	int: x = 5
 
-    x
+    {
+        int: x = 10
+
+        x
+    }
 }
