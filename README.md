@@ -2,6 +2,8 @@
 
 Ferrum is a hobby programming language written in C++ and powered by LLVM.
 
+Current Version: v0.1.0-alpha
+
 Current features:
 
 - Variables
