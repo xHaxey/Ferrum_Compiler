@@ -108,11 +108,11 @@ void Program::PackToExe(std::filesystem::path outputDir, std::string projectName
         return;
     }
 
+    std::cout << "Successfully create object file." << std::endl << std::endl;
+
     pass.run(builder.m_module);
     dest.flush();
     dest.close();
-
-    std::cout << "Current path:" << std::filesystem::current_path() << std::endl;
 
     auto clangPath = root;
 
