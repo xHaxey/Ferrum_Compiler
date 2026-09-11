@@ -361,3 +361,13 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+Ferrum_Compiler/external/
+
+*.obj
+*.exe
+*.pdb
+*.ilk
+*.ll
+
+
