@@ -7,7 +7,7 @@ std::vector<std::unique_ptr<Expression>> Parser::ParseFile()
 {
 	while (!IsAtEnd())
 	{
-		expressions.push_back(std::move(ParseHigher()));
+		expressions.push_back(std::move(ParseType()));
 	}
 
 	return std::move(expressions);
@@ -74,6 +74,13 @@ void Parser::SkipNewline()
 	}
 }
 
+Type Parser::MatchType()
+{
+	auto type = StringToType(Current()->Text());
+	Move();
+	return type;
+}
+
 bool Parser::Match(std::string string) noexcept
 {
 	if (Current()->Text() == string)
@@ -102,151 +109,198 @@ bool Parser::IsAtEnd() const noexcept
 	return false;
 }
 
-std::unique_ptr<Expression> Parser::ParseHigher()
+std::unique_ptr<Expression> Parser::ParseType()
 {
 	SkipNewline();
 
-	auto result = ParseType();
-
-	if (result)
+	if (Current()->Type() == TokenType::TYPE)
 	{
+		auto typeRange = Current()->Range();
+
+		auto type = MatchType();
+
+		auto end = Current()->Range().End();
+
+		auto result = Expected(":", "Expected ':' after type!");
+
+		if (!result)
+		{
+			return std::make_unique<ErrorExp>(
+				ExprType::ERROR, 
+				"Expected ':' after type!", 
+				SourceRange::Make(typeRange.Begin(), end)
+			);
+		}
+
+		std::unique_ptr<Expression> expression;
+
 		auto next = Next();
 
 		if (next)
 		{
 			if (next.value()->Text() == "[")
 			{
-				return ParsePureFunction(*result);
+				expression = std::move(ParsePureFunction(type));
 			}
 		}
+		else
+		{
+			expression = std::move(ParseVariable(type));
+		}
 
-		return ParseVariable(*result);
+		return std::make_unique<TypeExp>(
+			ExprType::TYPE, 
+			type, 
+			std::move(expression), 
+			SourceRange::Make(typeRange.Begin(), expression->range.End()),
+			typeRange
+		);
 	}
 
 	return ParseExpression();
 }
 
-std::expected<Token*,bool> Parser::ParseType()
-{
-	if (Current()->Type() == TokenType::TYPE)
-	{
-		auto typeToken = Current();
-		Move();
-
-		auto result = Expected(":", "Expected ':' after type!");
-
-		if (!result)
-		{
-			return std::unexpected<bool>(false);
-		}
-
-		return typeToken;
-	}
-	return std::unexpected<bool>(false);
-}
-
 std::unique_ptr<Expression> Parser::ParseBlock()
 {
-	auto begin = Current()->Range();
+	auto begin = Current()->Range().Begin();
 
-	auto result1 = Expected("{", "Expected block begin!");
+	auto resultOpen = Expected("{", "Expected block begin!");
 
-	if (!result1)
+	if (!resultOpen)
 	{
-		return std::make_unique<ErrorExp>("Expected block begin!", SourceRange::MergeRanges(begin, Current()->Range()));
+		return std::make_unique<ErrorExp>(
+			ExprType::ERROR,
+			"Expected block begin!", 
+			Current()->Range()
+		);
 	}
 
 	std::vector<std::unique_ptr<Expression>> expressions;
 
 	while (!Check("}") && !IsAtEnd())
 	{
-		expressions.push_back(ParseHigher());
+		expressions.push_back(ParseType());
 	}
 
-	auto result2 = Expected("}", "Expected block end!");
+	auto resultClose = Expected("}", "Expected block end!");
 
-	if (!result2)
+	if (!resultClose)
 	{
-		return std::make_unique<ErrorExp>("", SourceRange::MergeRanges(begin, Current()->Range()));
+		return std::make_unique<ErrorExp>(
+			ExprType::ERROR,
+			"Expected block end!", 
+			SourceRange::Make(begin, Current()->Range().End())
+		);
 	}
 	
-	return std::make_unique<BlockExp>(std::move(expressions), SourceRange::MergeRanges(begin, result2.value()->Range()));
+	return std::make_unique<BlockExp>(
+		ExprType::BLOCK,
+		std::move(expressions), 
+		SourceRange::Make(begin, resultClose.value()->Range().End())
+	);
 
 }
 
-std::unique_ptr<Expression> Parser::ParseVariable(Token* typeToken)
+std::unique_ptr<Expression> Parser::ParseVariable(Type type)
 {
-	auto identifier = Current();
-
-	if (identifier->Type() != TokenType::IDENTIFIER)
+	if (Current()->Type() == TokenType::IDENTIFIER)
 	{
-		error_queue.Add("Expected identifier after type!", SourceRange::MergeRanges(typeToken->Range(), identifier->Range()));
-		return std::make_unique<ErrorExp>("Expected identifier after type!", SourceRange::MergeRanges(typeToken->Range(), identifier->Range()));
-	}
-
-	Move();
-
-	if (Match("="))
-	{
-		auto value = std::move(ParseExpression());
-
-		return std::make_unique<VarDecExp>(StringToType(typeToken->Text()), identifier->Text(), std::move(value), SourceRange::MergeRanges(typeToken->Range(), identifier->Range()));
-	}
-	else
-	{
-		return std::make_unique<VarDecExp>(StringToType(typeToken->Text()), identifier->Text(), nullptr, SourceRange::MergeRanges(typeToken->Range(), identifier->Range()));
-	}
-}
-
-std::unique_ptr<Expression> Parser::ParsePureFunction(Token* typeToken)
-{
-	auto identifier = Current();
-
-	if (identifier->Type() != TokenType::IDENTIFIER)
-	{
-		error_queue.Add("Expected identifier after type!", SourceRange::MergeRanges(typeToken->Range(), identifier->Range()));
-		return std::make_unique<ErrorExp>("Expected identifier after type!", SourceRange::MergeRanges(typeToken->Range(), identifier->Range()));
-	}
-
-	Move();
-	Move();
-
-	std::vector<Parameter> parameters;
-
-	while (!Check("]") && !IsAtEnd())
-	{
-		auto type = ParseType();
-
-		if (!type)
-		{
-			error_queue.Add("Invalid type declaration!", Current()->Range());
-			break;
-		}
-
-		auto identifier = Current()->Text();
-
-		parameters.push_back(
-			Parameter(SourceRange::MergeRanges(type.value()->Range(), Current()->Range()), StringToType(type.value()->Text()), identifier)
-		);
+		auto identifier = Current();
 
 		Move();
 
-		if (!Match(","))
+		if (Match("="))
 		{
-			break;
+			auto value = std::move(ParseExpression());
+
+			return std::make_unique<VarDecExp>(
+				ExprType::VARDEC,
+				type,
+				identifier->Text(),
+				std::move(value),
+				SourceRange::Merge(identifier->Range(), value->range)
+			);
+		}
+		else
+		{
+			return std::make_unique<VarDecExp>(
+				ExprType::VARDEC,
+				type,
+				identifier->Text(),
+				nullptr,
+				identifier->Range()
+			);
 		}
 	}
-
-	auto result = Expected("]", "Expected ']' end!");
-
-	if (!result)
+	else
 	{
-		return std::make_unique<ErrorExp>("Expected ']' end!", SourceRange::MergeRanges(typeToken->Range(), Current()->Range()));
+		error_queue.Add("Expected identifier after type!", Current()->Range());
+
+		return std::make_unique<ErrorExp>(
+			ExprType::ERROR,
+			"Expected identifier after type!",
+			Current()->Range()
+		);
 	}
+}
 
-	auto block = std::move(ParseBlock());
+std::unique_ptr<Expression> Parser::ParsePureFunction(Type type)
+{
+	if (Current()->Type() == TokenType::IDENTIFIER)
+	{
+		auto identifier = Current();
 
-	return std::make_unique<FunctionExp>(true, StringToType(typeToken->Text()), identifier->Text(), parameters, std::move(block), SourceRange::MergeRanges(typeToken->Range(), block->range));
+		Move();
+		Move();
+
+		std::vector<std::unique_ptr<Expression>> parameters;
+
+		while (!Check("]") && !IsAtEnd())
+		{
+			auto typeExp = ParseType();
+
+			parameters.push_back(std::move(typeExp));
+
+			if (!Match(","))
+			{
+				break;
+			}
+		}
+
+		auto result = Expected("]", "Expected ']' end!");
+
+		if (result)
+		{
+			auto block = std::move(ParseBlock());
+
+			return std::make_unique<FunctionExp>(
+				ExprType::FUNCTION, 
+				true, 
+				type, 
+				identifier->Text(), 
+				parameters, 
+				std::move(block), 
+				SourceRange::Merge(identifier->Range(), block->range));
+
+		}
+		else
+		{
+			return std::make_unique<ErrorExp>(
+				ExprType::ERROR,
+				"Expected ']' end!",
+				SourceRange::Merge(identifier->Range(), Current()->Range())
+			);
+		}
+	}
+	else
+	{
+		error_queue.Add("Expected identifier after type!", Current()->Range());
+
+		return std::make_unique<ErrorExp>(
+			"Expected identifier after type!", 
+			Current()->Range()
+		);
+	}
 }
 
 std::unique_ptr<Expression> Parser::ParseExpression()
@@ -272,7 +326,13 @@ std::unique_ptr<Expression> Parser::ParseAssign()
 
 		auto right = std::move(ParseLogOr());
 
-		exp = std::make_unique<AssignExp>(std::move(exp), opType, std::move(right), SourceRange::MergeRanges(exp->range, right->range));
+		exp = std::make_unique<AssignExp>(
+			ExprType::ASSIGN, 
+			std::move(exp), 
+			opType, 
+			std::move(right), 
+			SourceRange::Merge(exp->range, right->range)
+		);
 	}
 
 	return exp;
@@ -289,7 +349,13 @@ std::unique_ptr<Expression> Parser::ParseLogOr()
 
 		auto right = std::move(ParseLogAnd());
 
-		exp = std::make_unique<BinaryExp>(std::move(exp), opType, std::move(right), SourceRange::MergeRanges(exp->range, right->range));
+		exp = std::make_unique<BinaryExp>(
+			ExprType::BINARY, 
+			std::move(exp), 
+			opType, 
+			std::move(right), 
+			SourceRange::Merge(exp->range, right->range)
+		);
 	}
 
 	return exp;
@@ -306,7 +372,13 @@ std::unique_ptr<Expression> Parser::ParseLogAnd()
 
 		auto right = std::move(ParseEqual());
 
-		exp = std::make_unique<BinaryExp>(std::move(exp), opType, std::move(right), SourceRange::MergeRanges(exp->range, right->range));
+		exp = std::make_unique<BinaryExp>(
+			ExprType::BINARY, 
+			std::move(exp), 
+			opType, 
+			std::move(right), 
+			SourceRange::Merge(exp->range, right->range)
+		);
 	}
 
 	return exp;
@@ -324,7 +396,13 @@ std::unique_ptr<Expression> Parser::ParseEqual()
 
 		auto right = std::move(ParseComparison());
 
-		exp = std::make_unique<BinaryExp>(std::move(exp), opType, std::move(right), SourceRange::MergeRanges(exp->range, right->range));
+		exp = std::make_unique<BinaryExp>(
+			ExprType::BINARY,
+			std::move(exp), 
+			opType, 
+			std::move(right), 
+			SourceRange::Merge(exp->range, right->range)
+		);
 	}
 
 	return exp;
@@ -344,7 +422,13 @@ std::unique_ptr<Expression> Parser::ParseComparison()
 
 		auto right = std::move(ParseTerm());
 
-		exp = std::make_unique<BinaryExp>(std::move(exp), opType, std::move(right), SourceRange::MergeRanges(exp->range, right->range));
+		exp = std::make_unique<BinaryExp>(
+			ExprType::BINARY,
+			std::move(exp), 
+			opType, 
+			std::move(right), 
+			SourceRange::Merge(exp->range, right->range)
+		);
 	}
 
 	return exp;
@@ -362,7 +446,13 @@ std::unique_ptr<Expression> Parser::ParseTerm()
 
 		auto right = std::move(ParseFactor());
 
-		exp = std::make_unique<BinaryExp>(std::move(exp), opType, std::move(right), SourceRange::MergeRanges(exp->range,right->range));
+		exp = std::make_unique<BinaryExp>(
+			ExprType::BINARY, 
+			std::move(exp), 
+			opType, 
+			std::move(right), 
+			SourceRange::Merge(exp->range,right->range)
+		);
 	}
 
 	return exp;
@@ -381,7 +471,13 @@ std::unique_ptr<Expression> Parser::ParseFactor()
 
 		auto right = std::move(ParseLogNot());
 
-		exp = std::make_unique<BinaryExp>(std::move(exp), opType, std::move(right), SourceRange::MergeRanges(exp->range, right->range));
+		exp = std::make_unique<BinaryExp>(
+			ExprType::BINARY, 
+			std::move(exp), 
+			opType, 
+			std::move(right), 
+			SourceRange::Merge(exp->range, right->range)
+		);
 	}
 
 	return exp;
@@ -397,7 +493,12 @@ std::unique_ptr<Expression> Parser::ParseLogNot()
 
 		auto right = std::move(ParseLogNot());
 
-		return std::make_unique<PreExp>(opType, std::move(right), SourceRange::MergeRanges(opRange, right->range));
+		return std::make_unique<PreExp>(
+			ExprType::PRE, 
+			opType, 
+			std::move(right), 
+			SourceRange::Merge(opRange, right->range)
+		);
 	}
 
 	return ParseUnary();
@@ -414,7 +515,12 @@ std::unique_ptr<Expression> Parser::ParseUnary()
 
 		auto right = std::move(ParseUnary());
 
-		return std::make_unique<PreExp>(opType, std::move(right), SourceRange::MergeRanges(opRange, right->range));
+		return std::make_unique<PreExp>(
+			ExprType::PRE, 
+			opType, 
+			std::move(right), 
+			SourceRange::Merge(opRange, right->range)
+		);
 	}
 
 	return ParsePre();
@@ -431,7 +537,12 @@ std::unique_ptr<Expression> Parser::ParsePre()
 
 		auto right = std::move(ParseUnary());
 
-		return std::make_unique<PreExp>(opType, std::move(right), SourceRange::MergeRanges(opRange, right->range));
+		return std::make_unique<PreExp>(
+			ExprType::PRE, 
+			opType, 
+			std::move(right), 
+			SourceRange::Merge(opRange, right->range)
+		);
 	}
 
 	return ParseCall();
@@ -471,19 +582,30 @@ std::unique_ptr<Expression> Parser::ParseCall()
 
 			auto result = pure ? Expected("]", "Expected closing ']'!") : Expected(")", "Expected closing ')'!");
 
-			auto endRange = args.empty() ? Current()->Range() : args.back()->range;
 
 			if (!result)
 			{
+				auto endRange = args.empty() ? Current()->Range() : args.back()->range;
+
 				std::string error = pure ? "Expected closing ']'!" : "Expected closing ')'!";
-				return std::make_unique<ErrorExp>(error, SourceRange::MergeRanges(exp->range, endRange));
+
+				return std::make_unique<ErrorExp>(
+					ExprType::ERROR, 
+					error, 
+					SourceRange::Merge(exp->range, endRange)
+				);
 			}
 		}
 
 		auto endRange = args.empty() ? Current()->Range() : args.back()->range;
 
-		exp = std::make_unique<CallExp>(pure, std::move(exp), std::move(args), SourceRange::MergeRanges(exp->range, endRange));
-
+		exp = std::make_unique<CallExp>(
+			ExprType::CALL, 
+			pure, 
+			std::move(exp), 
+			std::move(args), 
+			SourceRange::Merge(exp->range, endRange)
+		);
 	}
 
 	return exp;
@@ -500,7 +622,12 @@ std::unique_ptr<Expression> Parser::ParsePost()
 		auto opType = StringToPostOperator(Current()->Text());
 		Move();
 
-		exp = std::make_unique<PostExp>(std::move(exp), opType, SourceRange::MergeRanges(exp->range, opRange));
+		exp = std::make_unique<PostExp>(
+			ExprType::POST, 
+			std::move(exp), 
+			opType, 
+			SourceRange::Merge(exp->range, opRange)
+		);
 	}
 
 	return exp;
@@ -520,7 +647,11 @@ std::unique_ptr<Expression> Parser::ParseValue()
 		}
 		else
 		{
-			return std::make_unique<ErrorExp>("No closing of parenthesis!",Current()->Range());
+			return std::make_unique<ErrorExp>(
+				ExprType::ERROR, 
+				"No closing of parenthesis!",
+				SourceRange::Merge(exp->range, Current()->Range())
+			);
 		}
 	}
 
@@ -538,34 +669,34 @@ std::unique_ptr<Expression> Parser::ParseValue()
 	{
 	case TokenType::INT:
 	{
-		return std::make_unique<LiteralExp>(Value(std::stoi(token->Text())), token->Range());
+		return std::make_unique<LiteralExp>(ExprType::LITERAL, Value(std::stoi(token->Text())), token->Range());
 	}
 	case TokenType::FLOAT:
 	{
-		return std::make_unique<LiteralExp>(std::stof(token->Text()), token->Range());
+		return std::make_unique<LiteralExp>(ExprType::LITERAL, std::stof(token->Text()), token->Range());
 	}
 	case TokenType::CHAR:
 	{
-		return std::make_unique<LiteralExp>(token->Text()[0], token->Range());
+		return std::make_unique<LiteralExp>(ExprType::LITERAL, token->Text()[0], token->Range());
 	}
 	case TokenType::STRING:
 	{
-		return std::make_unique<LiteralExp>(token->Text(), token->Range());
+		return std::make_unique<LiteralExp>(ExprType::LITERAL, token->Text(), token->Range());
 	}
 	case TokenType::BOOL:
 	{
 		if (token->Text() == "false")
 		{
-			return std::make_unique<LiteralExp>(false, token->Range());
+			return std::make_unique<LiteralExp>(ExprType::LITERAL, false, token->Range());
 		}
 		else
 		{
-			return std::make_unique<LiteralExp>(true, token->Range());
+			return std::make_unique<LiteralExp>(ExprType::LITERAL, true, token->Range());
 		}
 	}
 	case TokenType::IDENTIFIER:
 	{
-		return std::make_unique<IdentifierExp>(token->Text(), token->Range());
+		return std::make_unique<IdentifierExp>(ExprType::IDENTIFIER, token->Text(), token->Range());
 	}
 	case TokenType::NEWLINE:
 	{
@@ -577,7 +708,7 @@ std::unique_ptr<Expression> Parser::ParseValue()
 	default:
 	{
 		error_queue.Add("Invalid Token!", token->Range());
-		return std::make_unique<ErrorExp>("Invalid Token!", token->Range());
+		return std::make_unique<ErrorExp>(ExprType::ERROR, "Invalid Token!", token->Range());
 	}
 	}
 }

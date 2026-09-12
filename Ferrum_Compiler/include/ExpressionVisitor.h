@@ -1,22 +1,11 @@
 #pragma once
 
-class LiteralExp;
-class IdentifierExp;
-class BinaryExp;
-class PreExp;
-class PostExp;
-class AssignExp;
-class VarDecExp;
-class CallExp;
-class BlockExp;
-class FunctionExp;
-class ErrorExp;
-
 class ExpressionVisitor
 {
 public:
     virtual void Visit(class LiteralExp&) = 0;
     virtual void Visit(class IdentifierExp&) = 0;
+    virtual void Visit(class TypeExp&) = 0;
     virtual void Visit(class BinaryExp&) = 0;
     virtual void Visit(class PreExp&) = 0;
     virtual void Visit(class PostExp&) = 0;

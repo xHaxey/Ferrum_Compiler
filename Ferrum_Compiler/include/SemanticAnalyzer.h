@@ -17,6 +17,7 @@ public:
 
     void Visit(class LiteralExp& exp) override;
     void Visit(class IdentifierExp& exp) override;
+    void Visit(class TypeExp& exp) override;
     void Visit(class BinaryExp& exp) override;
     void Visit(class PreExp& exp) override;
     void Visit(class PostExp& exp) override;

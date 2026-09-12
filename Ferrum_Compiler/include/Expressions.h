@@ -8,7 +8,7 @@
 class LiteralExp : public Expression
 {
 public:
-	LiteralExp(Value value, SourceRange range) : Expression(range), value(value) {}
+	LiteralExp(ExprType exprType, Value value, SourceRange range) : Expression(range, exprType), value(value) {}
 
 	Value value;
 
@@ -21,9 +21,35 @@ public:
 class IdentifierExp : public Expression
 {
 public:
-	IdentifierExp(std::string_view name, SourceRange range) : Expression(range), name(name) {}
+	IdentifierExp(ExprType exprType, std::string_view name, SourceRange range) : Expression(range, exprType), name(name) {}
 
 	std::string name;
+
+	void Accept(ExpressionVisitor& v) override
+	{
+		v.Visit(*this);
+	}
+};
+
+class TypeExp : public Expression
+{
+public:
+	TypeExp(
+		ExprType exprType, 
+		Type type, 
+		std::unique_ptr<Expression> expression, 
+		SourceRange range, 
+		SourceRange typeRange
+	) : 
+		Expression(range, exprType), 
+		type(type), 
+		expression(std::move(expression)),
+		typeRange(typeRange)
+	{}
+
+	Type type;
+	std::unique_ptr<Expression> expression;
+	SourceRange typeRange;
 
 	void Accept(ExpressionVisitor& v) override
 	{
@@ -35,12 +61,13 @@ class BinaryExp : public Expression
 {
 public:
 	BinaryExp(
+		ExprType exprType,
 		std::unique_ptr<Expression> left, 
 		BinaryOperator op, 
 		std::unique_ptr<Expression> right, 
 		SourceRange range
 	) : 
-		Expression(range),
+		Expression(range, exprType),
 		left(std::move(left)), 
 		op(op), 
 		right(std::move(right)) 
@@ -61,11 +88,12 @@ class PreExp : public Expression
 {
 public:
 	PreExp(
+		ExprType exprType,
 		PreOperator op,
 		std::unique_ptr<Expression> right, 
 		SourceRange range
 	) :
-		Expression(range),
+		Expression(range, exprType),
 		op(op),
 		right(std::move(right))
 	{}
@@ -84,11 +112,12 @@ class PostExp : public Expression
 {
 public:
 	PostExp(
+		ExprType exprType,
 		std::unique_ptr<Expression> left,
 		PostOperator op, 
 		SourceRange range
 	) :
-		Expression(range),
+		Expression(range, exprType),
 		left(std::move(left)),
 		op(op)
 	{}
@@ -107,12 +136,13 @@ class AssignExp : public Expression
 {
 public:
 	AssignExp(
+		ExprType exprType,
 		std::unique_ptr<Expression> left,
 		BinaryOperator op,
 		std::unique_ptr<Expression> right, 
 		SourceRange range
 	) :
-		Expression(range),
+		Expression(range, exprType),
 		target(std::move(left)),
 		op(op),
 		value(std::move(right))
@@ -134,12 +164,13 @@ class VarDecExp : public Expression
 {
 public:
 	VarDecExp(
+		ExprType exprType,
 		Type type, 
 		std::string name, 
 		std::unique_ptr<Expression> initializer, 
 		SourceRange range
 	) : 
-		Expression(range), 
+		Expression(range, exprType),
 		type(type), 
 		name(name), 
 		initializer(std::move(initializer)) 
@@ -160,12 +191,13 @@ class CallExp : public Expression
 {
 public:
 	CallExp(
+		ExprType exprType,
 		bool pure,
 		std::unique_ptr<Expression> calle, 
 		std::vector<std::unique_ptr<Expression>> args, 
 		SourceRange range
 	) : 
-		Expression(range),
+		Expression(range, exprType),
 		pure(pure),
 		calle(std::move(calle)), 
 		args(std::move(args)) 
@@ -186,7 +218,14 @@ public:
 class BlockExp : public Expression
 {
 public:
-	BlockExp(std::vector<std::unique_ptr<Expression>> expressions, SourceRange range) : Expression(range), expressions(std::move(expressions)) {}
+	BlockExp(
+		ExprType exprType, 
+		std::vector<std::unique_ptr<Expression>> expressions, 
+		SourceRange range
+	) : 
+		Expression(range, exprType),
+		expressions(std::move(expressions)) 
+	{}
 
 	std::vector<std::unique_ptr<Expression>> expressions;
 
@@ -200,18 +239,19 @@ class FunctionExp : public Expression
 {
 public:
 	FunctionExp(
+		ExprType exprType,
 		bool pure,
 		Type returnType,
 		std::string name,
-		std::vector<Parameter> args,
+		std::vector<std::unique_ptr<Expression>> args,
 		std::unique_ptr<Expression> body, 
 		SourceRange range
 	) :
-		Expression(range),
+		Expression(range, exprType),
 		pure(pure),
 		returnType(returnType),
 		name(name),
-		args(args),
+		args(std::move(args)),
 		body(std::move(body))
 	{}
 
@@ -220,7 +260,7 @@ public:
 
 	std::string name;
 
-	std::vector<Parameter> args;
+	std::vector<std::unique_ptr<Expression>> args;
 	std::unique_ptr<Expression> body;
 
 	void Accept(ExpressionVisitor& v) override
@@ -232,7 +272,7 @@ public:
 class ErrorExp : public Expression
 {
 public:
-	ErrorExp(std::string info, SourceRange range) : Expression(range), debugInfo(info) {}
+	ErrorExp(ExprType exprType, std::string info, SourceRange range) : Expression(range, exprType), debugInfo(info) {}
 
 	std::string debugInfo;
 

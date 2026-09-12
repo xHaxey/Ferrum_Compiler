@@ -41,6 +41,11 @@ void SemanticAnalyzer::Visit(IdentifierExp& exp)
 	exp.resolvedSymbol = symbol;
 }
 
+void SemanticAnalyzer::Visit(TypeExp& exp)
+{
+	exp.expression->Accept(*this);
+}
+
 void SemanticAnalyzer::Visit(BinaryExp& exp)
 {
 	exp.left->Accept(*this);

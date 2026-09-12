@@ -51,6 +51,11 @@ size_t SourceRange::StartPosition() const noexcept
 	return m_begin.Position();
 }
 
+size_t SourceRange::EndLine() const noexcept
+{
+	return m_end.Line();
+}
+
 size_t SourceRange::EndPosition() const noexcept
 {
 	return m_end.Position();

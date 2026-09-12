@@ -16,18 +16,19 @@ public:
 	size_t Count() const noexcept;
 	size_t StartLine() const noexcept;
 	size_t StartColumn() const noexcept;
-	size_t EndColumn() const noexcept;
 	size_t StartPosition() const noexcept;
+	size_t EndLine() const noexcept;
+	size_t EndColumn() const noexcept;
 	size_t EndPosition() const noexcept;
 
 	SourceFile* GetFile() const noexcept;
 
-	static SourceRange MergeRanges(const SourceRange& lhs, const SourceRange& rhs)
+	static SourceRange Merge(const SourceRange& lhs, const SourceRange& rhs)
 	{
 		return { lhs.Begin(), rhs.End() };
 	};
 
-	static SourceRange MakeRange(const SourceLocation& begin, const SourceLocation& end)
+	static SourceRange Make(const SourceLocation& begin, const SourceLocation& end)
 	{
 		return { begin, end };
 	}

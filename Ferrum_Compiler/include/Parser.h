@@ -24,17 +24,17 @@ private:
 
 	void SkipNewline();
 
+	Type MatchType();
+
 	bool Match(std::string string) noexcept;
 	bool Check(std::string string) noexcept;
 	bool IsAtEnd() const noexcept;
 
-	std::unique_ptr<Expression>ParseHigher();
-
-	std::expected<Token*, bool>ParseType();
+	std::unique_ptr<Expression> ParseType();
 
 	std::unique_ptr<Expression>ParseBlock();
-	std::unique_ptr<Expression>ParseVariable(Token* typeToken);
-	std::unique_ptr<Expression>ParsePureFunction(Token* typeToken);
+	std::unique_ptr<Expression>ParseVariable(Type type);
+	std::unique_ptr<Expression>ParsePureFunction(Type type);
 
 	std::unique_ptr<Expression>ParseExpression();
 
