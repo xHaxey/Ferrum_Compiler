@@ -22,6 +22,12 @@
     <Filter Include="Examples">
       <UniqueIdentifier>{08006f77-a7f0-4959-b1e4-37bc45b2f263}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Expressions">
+      <UniqueIdentifier>{2ca298c3-8763-476c-b77a-8d01f97dae63}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Sources">
+      <UniqueIdentifier>{f17c2e56-1844-4226-ae2d-a871e1ea45a4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Error.h">
@@ -48,18 +54,6 @@
     <ClInclude Include="include\SemanticAnalyzer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\SourceFile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\SourceLocation.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\SourceManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\SourceRange.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\SymbolTable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -67,15 +61,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\ASTNode.h">
-      <Filter>Header Files\AST</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ExprPrinter.h">
-      <Filter>Header Files\AST</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Expressions.h">
-      <Filter>Header Files\AST</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ExpressionVisitor.h">
       <Filter>Header Files\AST</Filter>
     </ClInclude>
     <ClInclude Include="include\Keyword.h">
@@ -102,8 +87,29 @@
     <ClInclude Include="include\Symbol.h">
       <Filter>Header Files\AST</Filter>
     </ClInclude>
+    <ClInclude Include="include\ExpressionVisitor.h">
+      <Filter>Header Files\Expressions</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Expressions.h">
+      <Filter>Header Files\Expressions</Filter>
+    </ClInclude>
     <ClInclude Include="include\Expression.h">
-      <Filter>Header Files\AST</Filter>
+      <Filter>Header Files\Expressions</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ExprPrinter.h">
+      <Filter>Header Files\Expressions</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SourceFile.h">
+      <Filter>Header Files\Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SourceLocation.h">
+      <Filter>Header Files\Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SourceManager.h">
+      <Filter>Header Files\Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SourceRange.h">
+      <Filter>Header Files\Sources</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
