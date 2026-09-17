@@ -3,11 +3,11 @@
 #include "Type.h"
 #include "Symbol.h"
 
-class ASTNode
+class Node
 {
 public:
-	ASTNode(SourceRange range) : range(range) {};
-	virtual ~ASTNode() = default;
+	Node(SourceRange range) : range(range) {};
+	virtual ~Node() = default;
 
 	SourceRange range;
 	Type resolvedType = Type::INVALID;

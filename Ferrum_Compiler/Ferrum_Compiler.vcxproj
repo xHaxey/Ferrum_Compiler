@@ -27,7 +27,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\ASTNode.h" />
+    <ClInclude Include="include\Node.h" />
     <ClInclude Include="include\ExprPrinter.h" />
     <ClInclude Include="include\Error.h" />
     <ClInclude Include="include\ErrorQueue.h" />
@@ -54,8 +54,12 @@
     <ClInclude Include="include\Type.h" />
     <ClInclude Include="include\TypeChecker.h" />
     <ClInclude Include="include\Value.h" />
+    <ClInclude Include="NodeParser.h" />
+    <ClInclude Include="Nodes.h" />
+    <ClInclude Include="NodeVisitor.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="NodeParser.cpp" />
     <ClCompile Include="src\ExprPrinter.cpp" />
     <ClCompile Include="src\ErrorQueue.cpp" />
     <ClCompile Include="src\Lexer.cpp" />
