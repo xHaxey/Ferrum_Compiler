@@ -16,7 +16,7 @@ std::vector<std::unique_ptr<Token>> Lexer::TokenizeSource()
 
 		if (Current() == '\n')
 		{
-			tokens.push_back(MakeToken(TokenType::NEWLINE, SourceRange::MakeRange(current_location, current_location)));
+			tokens.push_back(MakeToken(TokenType::NEWLINE, SourceRange::Make(current_location, current_location)));
 			Move();
 			continue;
 		}
@@ -110,13 +110,13 @@ std::expected<std::unique_ptr<Token>, bool> Lexer::ReadChar() noexcept
 		if (Current() == '\'')
 		{
 			Move();
-			auto range = SourceRange::MakeRange(begin, end);
+			auto range = SourceRange::Make(begin, end);
 			return MakeToken(TokenType::CHAR, range);
 		}
 		else
 		{
 			end = current_location;
-			auto range = SourceRange::MakeRange(begin, end);
+			auto range = SourceRange::Make(begin, end);
 
 			error_queue.Add("Expected end quats on char literal!", range);
 			return MakeToken(TokenType::INVALID,range);
@@ -146,13 +146,13 @@ std::expected<std::unique_ptr<Token>, bool> Lexer::ReadString() noexcept
 		if (Current() == '"')
 		{
 			Move();
-			auto range = SourceRange::MakeRange(begin, end);
+			auto range = SourceRange::Make(begin, end);
 			return MakeToken(TokenType::STRING, range);
 		}
 		else
 		{
 			end = current_location;
-			auto range = SourceRange::MakeRange(begin, end);
+			auto range = SourceRange::Make(begin, end);
 
 			error_queue.Add("Expected end quats on string literal!", range);
 			return MakeToken(TokenType::INVALID, range);
@@ -186,7 +186,7 @@ bool Lexer::ReadComment() noexcept
 		else
 		{
 			end = current_location;
-			auto range = SourceRange::MakeRange(begin, end);
+			auto range = SourceRange::Make(begin, end);
 
 			error_queue.Add("Expected end of comment!", range);
 			return false;
@@ -223,7 +223,7 @@ std::expected<std::unique_ptr<Token>, bool> Lexer::ReadOperator() noexcept
 			break;
 		}
 		}
-		auto range = SourceRange::MakeRange(begin, end);
+		auto range = SourceRange::Make(begin, end);
 
 		return MakeToken(TokenType::OPERATOR, range);
 	}
@@ -258,13 +258,13 @@ std::expected<std::unique_ptr<Token>, bool> Lexer::ReadNumber() noexcept
 				end = current_location;
 				Move();
 			}
-			auto range = SourceRange::MakeRange(begin, end);
+			auto range = SourceRange::Make(begin, end);
 
 			return MakeToken(TokenType::FLOAT, range);
 		}
 		else
 		{
-			auto range = SourceRange::MakeRange(begin, end);
+			auto range = SourceRange::Make(begin, end);
 
 			return MakeToken(TokenType::INT, range);
 		}
@@ -282,7 +282,7 @@ std::unique_ptr<Token> Lexer::ReadIdentifier() noexcept
 	if (!IsIdentifierStart())
 	{
 		Move();
-		auto range = SourceRange::MakeRange(begin, end);
+		auto range = SourceRange::Make(begin, end);
 
 		error_queue.Add("Invalid character!", range);
 		return MakeToken(TokenType::INVALID, range);
@@ -295,7 +295,7 @@ std::unique_ptr<Token> Lexer::ReadIdentifier() noexcept
 		Move();
 	}
 
-	auto range = SourceRange::MakeRange(begin, end);
+	auto range = SourceRange::Make(begin, end);
 
 	if ((string == "false") || (string == "true"))
 	{

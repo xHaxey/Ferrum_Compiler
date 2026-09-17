@@ -1,24 +1,21 @@
 #pragma once
 #include "Expressions.h"
 #include "ExpressionVisitor.h"
-#include "ASTNode.h"
 #include <iostream>
 
-class ASTPrinter : public ExpressionVisitor
+class ExprPrinter : public ExpressionVisitor
 {
 public:
 	void Print(Expression& expr);
 
     void Visit(class LiteralExp& exp) override;
     void Visit(class IdentifierExp& exp) override;
+    void Visit(class TypeExp&) override;
+    void Visit(class KeywordExp&) override;
+    void Visit(class OperatorExp&) override;
     void Visit(class BinaryExp& exp) override;
     void Visit(class PreExp& exp) override;
     void Visit(class PostExp& exp) override;
-    void Visit(class AssignExp& exp) override;
-    void Visit(class VarDecExp& exp) override;
-    void Visit(class CallExp& exp) override;
-    void Visit(class BlockExp& exp) override;
-    void Visit(class FunctionExp& exp) override;
     void Visit(class ErrorExp& exp) override;
 
 private:

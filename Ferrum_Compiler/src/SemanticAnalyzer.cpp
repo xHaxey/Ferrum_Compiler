@@ -1,28 +1,25 @@
 #include "SemanticAnalyzer.h"
 
-void SemanticAnalyzer::Analyze(Expression& expr)
+void SemanticAnalyzer::Analyze(std::set<ExprType> allowed, Expression& expr, ExprType parentType)
 {
+	lastSymbol = nullptr;
+
+	auto it = allowed.find(expr.exprType);
+
+	if (it == allowed.end())
+	{
+		std::ostringstream oss;
+		oss << "Expression: '"
+			<< ExprToString(expr.exprType)
+			<< "' not allowed after expression: '"
+			<< ExprToString(parentType)
+			<< "'!";
+
+		error_queue.Add(oss.str(), expr.range);
+		return;
+	}
+
 	expr.Accept(*this);
-}
-
-Symbol* SemanticAnalyzer::ResolveFunction(Expression& expr)
-{
-	if (auto id = dynamic_cast<IdentifierExp*>(&expr))
-	{
-		return table->Find(id->name);
-	}
-
-	return nullptr;
-}
-
-Symbol* SemanticAnalyzer::ResolveVariable(Expression& expr)
-{
-	if (auto id = dynamic_cast<IdentifierExp*>(&expr))
-	{
-		return table->Find(id->name);
-	}
-
-	return nullptr;
 }
 
 void SemanticAnalyzer::Visit(LiteralExp& exp)
@@ -35,39 +32,36 @@ void SemanticAnalyzer::Visit(IdentifierExp& exp)
 	if (!symbol)
 	{
 		error_queue.Add("Undefined identifier!", exp.range);
-		return;
 	}
 
 	exp.resolvedSymbol = symbol;
-}
-
-void SemanticAnalyzer::Visit(TypeExp& exp)
-{
-	exp.expression->Accept(*this);
+	lastSymbol = symbol;
 }
 
 void SemanticAnalyzer::Visit(BinaryExp& exp)
 {
-	exp.left->Accept(*this);
-	exp.right->Accept(*this);
+	Analyze(exp.allowed, *exp.left.get(), exp.exprType);
+	Analyze(exp.allowed, *exp.right.get(), exp.exprType);
 }
 
 void SemanticAnalyzer::Visit(PreExp& exp)
 {
-	exp.right->Accept(*this);
+	Analyze(exp.allowed, *exp.right.get(), exp.exprType);
 }
 
 void SemanticAnalyzer::Visit(PostExp& exp)
 {
-	exp.left->Accept(*this);
+	Analyze(exp.allowed, *exp.left.get(), exp.exprType);
 }
 
 void SemanticAnalyzer::Visit(AssignExp& exp)
 {
-	auto symbol = ResolveVariable(*exp.target.get());
+	Analyze(exp.allowedTarget, *exp.target.get(), exp.exprType);
+
+	auto symbol = lastSymbol;
+
 	if (!symbol)
 	{
-		error_queue.Add("Undefined identifier!", exp.target->range);
 		return;
 	}
 
@@ -77,8 +71,7 @@ void SemanticAnalyzer::Visit(AssignExp& exp)
 		return;
 	}
 
-	exp.target->Accept(*this);
-	exp.value->Accept(*this);
+	Analyze(exp.allowedValue, *exp.value.get(), exp.exprType);
 }
 
 void SemanticAnalyzer::Visit(VarDecExp& exp)
@@ -91,22 +84,26 @@ void SemanticAnalyzer::Visit(VarDecExp& exp)
 
 	VariableInfo varInfo = { exp.type };
 
-	Symbol var = { Symbol::Kind::VARIABLE, exp.name, varInfo };
+	auto var = std::make_unique<Symbol>(Symbol::Kind::VARIABLE, exp.name, varInfo);
 
-	table->Insert(var);
+	auto ptr = table->Insert(std::move(var));
 
 	if (exp.initializer)
 	{
-		exp.initializer->Accept(*this);
+		Analyze(exp.allowedInitializer, *exp.initializer.get(), exp.exprType);
 	}
+
+	lastSymbol = ptr;
 }
 
 void SemanticAnalyzer::Visit(CallExp& exp)
 {
-	auto symbol = ResolveFunction(*exp.calle.get());
+	Analyze(exp.allowedCalle, *exp.calle.get(), exp.exprType);
+
+	auto symbol = lastSymbol;
+
 	if (!symbol)
 	{
-		error_queue.Add("Call to undefined function!", exp.range);
 		return;
 	}
 
@@ -127,11 +124,9 @@ void SemanticAnalyzer::Visit(CallExp& exp)
 		return;
 	}
 
-	exp.calle->Accept(*this);
-
 	for (auto& arg : exp.args)
 	{
-		arg->Accept(*this);
+		Analyze(exp.allowedArg, *arg.get(), exp.exprType);
 	}
 
 	exp.resolvedSymbol = symbol;
@@ -157,37 +152,44 @@ void SemanticAnalyzer::Visit(FunctionExp& exp)
 		return;
 	}
 
-	FunctionInfo info = {exp.returnType, exp.args};
-
-	Symbol function = {Symbol::Kind::FUNCTION, exp.name, info};
-
-	table->Insert(function);
+	std::vector<Symbol*> params;
 
 	table->EnterScope();
 
 	bool failed = false;
 
-	for (auto param : exp.args)
+	for (auto& arg : exp.args)
 	{
-		VariableInfo varInfo = {param.type};
+		Analyze(exp.allowedArg, *arg.get(), exp.exprType);
 
-		Symbol var = { Symbol::Kind::VARIABLE, param.name, varInfo };
+		auto symbol = lastSymbol;
 
-		if (table->ExistsInCurrentScope(param.name))
+		if (!symbol)
 		{
-			error_queue.Add("Parameter identifier already defined in this scope!", param.range);
 			failed = true;
+			break;
 		}
 
-		auto b = table->Insert(var);
+		params.push_back(symbol);
 	}
 
 	if (!failed)
 	{
-		exp.body->Accept(*this);
+		Analyze(exp.allowedBody, *exp.body.get(), exp.exprType);
 	}
 
 	table->ExitScope();
+
+	if (failed)
+	{
+		return;
+	}
+
+	FunctionInfo info = { exp.returnType, params };
+
+	auto function = std::make_unique<Symbol>( Symbol::Kind::FUNCTION, exp.name, info );
+
+	lastSymbol = table->Insert(std::move(function));
 
 	if (exp.name == "main")
 	{

@@ -32,16 +32,17 @@ void SymbolTable::ExitScope()
 	}
 }
 
-bool SymbolTable::Insert(Symbol symbol)
+Symbol* SymbolTable::Insert(std::unique_ptr<Symbol> symbol)
 {
-	if (Current()->symbols.contains(symbol.name))
+	if (Current()->symbols.contains(symbol->name))
 	{
-		return false;
+		return nullptr;
 	}
+	auto ptr = symbol.get();
 
-	Current()->symbols.emplace(symbol.name, std::move(symbol));
+	Current()->symbols.emplace(symbol->name, std::move(symbol));
 
-	return true;
+	return ptr;
 }
 
 bool SymbolTable::ExistsInCurrentScope(std::string_view name)
@@ -71,7 +72,7 @@ Symbol* SymbolTable::Find(std::string_view name)
 
 		if (it != scope->symbols.end())
 		{
-			return &it->second;
+			return it->second.get();
 		}
 
 		scope = scope->parent;

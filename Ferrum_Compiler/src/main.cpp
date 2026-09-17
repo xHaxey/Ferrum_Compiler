@@ -1,8 +1,8 @@
 #include "Lexer.h"
-#include "Parser.h"
+#include "ExpressionParser.h"
 #include "SourceManager.h"
-#include "ASTPrinter.h"
-#include "Program.h"
+#include "ExprPrinter.h"
+//#include "Program.h"
 #include <iostream>
 #include <filesystem>
 
@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
     }
 
     bool HasErrors = false;
-    Program program;
+    //Program program;
 
     for (auto& file : sourceManager.Files())
     {
@@ -43,27 +43,27 @@ int main(int argc, char* argv[])
             continue;
         }
 
-        Parser parser(tokens);
+        ExprParser exprParser(tokens);
 
-        auto ast = parser.ParseFile();
+        auto ast = exprParser.ParseFile();
 
 #ifndef NODEBUG
-        ASTPrinter printer;
+        ExprPrinter exprPrinter;
 
         for (auto& expr : ast)
         {
-            printer.Print(*expr.get());
+            exprPrinter.Print(*expr.get());
         }
 #endif // !NDEBUG
 
-        if (!parser.error_queue.Empty())
+        if (!exprParser.error_queue.Empty())
         {
-            parser.error_queue.Print();
+            exprParser.error_queue.Print();
             HasErrors = true;
             continue;
         }
 
-        program.AddAST(std::move(ast));
+        //program.AddAST(std::move(ast));
 
     }
 
@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    program.AnalyzeSemantics();
+    /*program.AnalyzeSemantics();
 
     if (!program.semantic_analyzer.error_queue.Empty())
     {
@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
     else
     {
         std::cout << "Couldn't create output directory called 'build' in provided directory!" << std::endl;
-    }
+    }*/
     
     return 0;
 }

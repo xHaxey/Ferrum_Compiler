@@ -39,7 +39,7 @@
     <ClInclude Include="include\LLVMBuilder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Parser.h">
+    <ClInclude Include="include\ExpressionParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Program.h">
@@ -69,7 +69,7 @@
     <ClInclude Include="include\ASTNode.h">
       <Filter>Header Files\AST</Filter>
     </ClInclude>
-    <ClInclude Include="include\ASTPrinter.h">
+    <ClInclude Include="include\ExprPrinter.h">
       <Filter>Header Files\AST</Filter>
     </ClInclude>
     <ClInclude Include="include\Expressions.h">
@@ -102,9 +102,12 @@
     <ClInclude Include="include\Symbol.h">
       <Filter>Header Files\AST</Filter>
     </ClInclude>
+    <ClInclude Include="include\Expression.h">
+      <Filter>Header Files\AST</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\ASTPrinter.cpp">
+    <ClCompile Include="src\ExprPrinter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\ErrorQueue.cpp">
@@ -113,19 +116,10 @@
     <ClCompile Include="src\Lexer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\LLVMBuilder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Parser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Program.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\SemanticAnalyzer.cpp">
+    <ClCompile Include="src\ExpressionParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\SourceLocation.cpp">
@@ -135,12 +129,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\SourceRange.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\SymbolTable.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\TypeChecker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,9 +1,12 @@
 #pragma once
-#include "ASTNode.h"
+#include "Expression.h"
 #include "Value.h"
 #include "Operator.h"
 #include "Type.h"
 #include "ExpressionVisitor.h"
+#include "Keyword.h"
+#include <memory>
+#include <set>
 
 class LiteralExp : public Expression
 {
@@ -34,24 +37,37 @@ public:
 class TypeExp : public Expression
 {
 public:
-	TypeExp(
-		ExprType exprType, 
-		Type type, 
-		std::unique_ptr<Expression> expression, 
-		SourceRange range, 
-		SourceRange typeRange
-	) : 
-		Expression(range, exprType), 
-		type(type), 
-		expression(std::move(expression)),
-		typeRange(typeRange)
-	{}
+	TypeExp(ExprType exprType, Type type, SourceRange range) : Expression(range, exprType), type(type) {}
 
 	Type type;
-	std::unique_ptr<Expression> expression;
-	SourceRange typeRange;
 
 	void Accept(ExpressionVisitor& v) override
+	{
+		v.Visit(*this);
+	}
+};
+
+class KeywordExp : public Expression
+{
+public:
+	KeywordExp(ExprType exprType, Keyword keyword, SourceRange range) : Expression(range, exprType), keyword(keyword) {}
+
+	Keyword keyword;
+
+	void Accept(ExpressionVisitor& v) override
+	{
+		v.Visit(*this);
+	}
+};
+
+class OperatorExp : public Expression
+{
+public:
+	OperatorExp(ExprType exprType, std::string op, SourceRange range) : Expression(range, exprType), op(op) {}
+
+	std::string op;
+
+	void Accept(ExpressionVisitor& v)
 	{
 		v.Visit(*this);
 	}
@@ -68,9 +84,9 @@ public:
 		SourceRange range
 	) : 
 		Expression(range, exprType),
-		left(std::move(left)), 
+		left(std::move(left)),
 		op(op), 
-		right(std::move(right)) 
+		right(std::move(right))
 	{}
 
 	BinaryOperator op;
@@ -91,16 +107,20 @@ public:
 		ExprType exprType,
 		PreOperator op,
 		std::unique_ptr<Expression> right, 
-		SourceRange range
+		SourceRange range,
+		SourceRange prefixRange
 	) :
 		Expression(range, exprType),
 		op(op),
-		right(std::move(right))
+		right(std::move(right)),
+		prefixRange(prefixRange)
 	{}
 
 	PreOperator op;
 
 	std::unique_ptr<Expression> right;
+
+	SourceRange prefixRange;
 
 	void Accept(ExpressionVisitor& v) override
 	{
@@ -115,153 +135,20 @@ public:
 		ExprType exprType,
 		std::unique_ptr<Expression> left,
 		PostOperator op, 
-		SourceRange range
+		SourceRange range,
+		SourceRange postfixRange
 	) :
 		Expression(range, exprType),
 		left(std::move(left)),
-		op(op)
+		op(op),
+		postfixRange(postfixRange)
 	{}
 
 	PostOperator op;
 
 	std::unique_ptr<Expression> left;
 
-	void Accept(ExpressionVisitor& v) override
-	{
-		v.Visit(*this);
-	}
-};
-
-class AssignExp : public Expression
-{
-public:
-	AssignExp(
-		ExprType exprType,
-		std::unique_ptr<Expression> left,
-		BinaryOperator op,
-		std::unique_ptr<Expression> right, 
-		SourceRange range
-	) :
-		Expression(range, exprType),
-		target(std::move(left)),
-		op(op),
-		value(std::move(right))
-	{
-	}
-
-	BinaryOperator op;
-
-	std::unique_ptr<Expression> target;
-	std::unique_ptr<Expression> value;
-
-	void Accept(ExpressionVisitor& v) override
-	{
-		v.Visit(*this);
-	}
-};
-
-class VarDecExp : public Expression
-{
-public:
-	VarDecExp(
-		ExprType exprType,
-		Type type, 
-		std::string name, 
-		std::unique_ptr<Expression> initializer, 
-		SourceRange range
-	) : 
-		Expression(range, exprType),
-		type(type), 
-		name(name), 
-		initializer(std::move(initializer)) 
-	{}
-
-	Type type;
-	std::string name;
-
-	std::unique_ptr<Expression> initializer;
-
-	void Accept(ExpressionVisitor& v) override
-	{
-		v.Visit(*this);
-	}
-};
-
-class CallExp : public Expression
-{
-public:
-	CallExp(
-		ExprType exprType,
-		bool pure,
-		std::unique_ptr<Expression> calle, 
-		std::vector<std::unique_ptr<Expression>> args, 
-		SourceRange range
-	) : 
-		Expression(range, exprType),
-		pure(pure),
-		calle(std::move(calle)), 
-		args(std::move(args)) 
-	{}
-
-	bool pure;
-
-	std::unique_ptr<Expression> calle;
-
-	std::vector<std::unique_ptr<Expression>> args;
-
-	void Accept(ExpressionVisitor& v) override
-	{
-		v.Visit(*this);
-	}
-};
-
-class BlockExp : public Expression
-{
-public:
-	BlockExp(
-		ExprType exprType, 
-		std::vector<std::unique_ptr<Expression>> expressions, 
-		SourceRange range
-	) : 
-		Expression(range, exprType),
-		expressions(std::move(expressions)) 
-	{}
-
-	std::vector<std::unique_ptr<Expression>> expressions;
-
-	void Accept(ExpressionVisitor& v) override
-	{
-		v.Visit(*this);
-	}
-};
-
-class FunctionExp : public Expression
-{
-public:
-	FunctionExp(
-		ExprType exprType,
-		bool pure,
-		Type returnType,
-		std::string name,
-		std::vector<std::unique_ptr<Expression>> args,
-		std::unique_ptr<Expression> body, 
-		SourceRange range
-	) :
-		Expression(range, exprType),
-		pure(pure),
-		returnType(returnType),
-		name(name),
-		args(std::move(args)),
-		body(std::move(body))
-	{}
-
-	bool pure;
-	Type returnType;
-
-	std::string name;
-
-	std::vector<std::unique_ptr<Expression>> args;
-	std::unique_ptr<Expression> body;
+	SourceRange postfixRange;
 
 	void Accept(ExpressionVisitor& v) override
 	{

@@ -14,7 +14,7 @@ void Program::AnalyzeSemantics()
 {
 	for (auto& expr : expressions)
 	{
-		semantic_analyzer.Analyze(*expr.get());
+        expr->Accept(semantic_analyzer);
 	}
 
 	if (!semantic_analyzer.hasMain)

@@ -2,84 +2,105 @@
 #include <string>
 
 #define BINARY_OPERATOR_LIST \
-	X(MULTI,				"*") \
-	X(DIV,					"/") \
-	X(MOD,					"%") \
-	X(ADD,					"+") \
-	X(SUB,					"-") \
-	X(GR,					">") \
-	X(GRE,					">=") \
-	X(LS,					"<") \
-	X(LSE,					"<=") \
-	X(EQ,					"==") \
-	X(NEQ,					"!=") \
-	X(LOG_AND,				"&&") \
-	X(LOG_OR,				"||") \
-	X(ASSIGN,				"=") \
-	X(ADD_ASSIGN,			"+=") \
-	X(SUB_ASSIGN,			"-=") \
-	X(MULTI_ASSIGN,			"*=") \
-	X(DIV_ASSIGN,			"/=") \
-	X(MOD_ASSIGN,			"%=") \
-	X(INVALID,				"<INVALID>")
+	X(MULTI,		70, 71,	"*") \
+	X(DIV,			70, 71,	"/") \
+	X(MOD,			70, 71,	"%") \
+	X(ADD,			60, 61,	"+") \
+	X(SUB,			60, 61,	"-") \
+	X(GR,			50, 50,	">") \
+	X(GRE,			50, 50,	">=") \
+	X(LS,			50, 50,	"<") \
+	X(LSE,			50, 50,	"<=") \
+	X(EQ,			40, 40,	"==") \
+	X(NEQ,			40, 40,	"!=") \
+	X(LOG_AND,		30, 30,	"&&") \
+	X(LOG_OR,		20, 20,	"||") \
+	X(ASSIGN,		10, 10,	"=") \
+	X(ADD_ASSIGN,	10, 10,	"+=") \
+	X(SUB_ASSIGN,	10, 10,	"-=") \
+	X(MULTI_ASSIGN,	10, 10,	"*=") \
+	X(DIV_ASSIGN,	10, 10,	"/=") \
+	X(MOD_ASSIGN,	10, 10,	"%=") \
+	X(INVALID,		0, 0,		"<INVALID>")
 
 #define PRE_OPERATOR_LIST \
-	X(PRE_INC,				"++") \
-	X(PRE_DEC,				"--") \
-	X(POS,					"+") \
-	X(NEG,					"-") \
-	X(LOG_NOT,				"!") \
-	X(COMMENT,				"//") \
-	X(INVALID, "<INVALID>")
+	X(PRE_INC,		0, 100,	"++") \
+	X(PRE_DEC,		0, 100,	"--") \
+	X(POS,			0, 90,	"+") \
+	X(NEG,			0, 90,	"-") \
+	X(LOG_NOT,		0, 80,	"!") \
+	X(INVALID,		0, 0,		"<INVALID>")
 
 #define POST_OPERATOR_LIST \
-	X(POST_INC,				"++") \
-	X(POST_DEC,				"--") \
-	X(COLON,				":") \
-	X(COMMA,				",") \
-	X(COMMENT,				"//") \
-	X(INVALID, "<INVALID>")
+	X(POST_INC,		110, 0,	"++") \
+	X(POST_DEC,		110, 0,	"--") \
+	X(INVALID,		0, 0,		"<INVALID>")
 
-
+struct BindingPower
+{
+	size_t leftBp;
+	size_t rightBp;
+};
 
 enum class BinaryOperator
 {
-#define X(name, text) name,
+#define X(name, lBp, rBp, text) name,
 	BINARY_OPERATOR_LIST
 #undef X
 };
 
 inline constexpr const char* BinaryOperatorStrings[]
 {
-#define X(name, text) text,
+#define X(name, lBp, rBp, text) text,
+	BINARY_OPERATOR_LIST
+#undef X
+};
+
+inline constexpr const BindingPower BinaryPrecedence[]
+{
+#define X(name, lBp, rBp, text) {lBp, rBp},
 	BINARY_OPERATOR_LIST
 #undef X
 };
 
 enum class PreOperator
 {
-#define X(name, text) name,
+#define X(name, lBp, rBp, text) name,
 	PRE_OPERATOR_LIST
 #undef X
 };
 
 inline constexpr const char* PreOperatorStrings[]
 {
-#define X(name, text) text,
+#define X(name, lBp, rBp, text) text,
+	PRE_OPERATOR_LIST
+#undef X
+};
+
+inline constexpr const BindingPower PrePrecedence[]
+{
+#define X(name, lBp, rBp, text) {lBp, rBp},
 	PRE_OPERATOR_LIST
 #undef X
 };
 
 enum class PostOperator
 {
-#define X(name, text) name,
+#define X(name, lBp, rBp, text) name,
 	POST_OPERATOR_LIST
 #undef X
 };
 
 inline constexpr const char* PostOperatorStrings[]
 {
-#define X(name, text) text,
+#define X(name, lBp, rBp, text) text,
+	POST_OPERATOR_LIST
+#undef X
+};
+
+inline constexpr const BindingPower PostPrecedence[]
+{
+#define X(name, lBp, rBp, text) {lBp, rBp},
 	POST_OPERATOR_LIST
 #undef X
 };
@@ -142,4 +163,19 @@ static PostOperator StringToPostOperator(std::string string)
 static std::string PostOperatorToString(PostOperator postOp)
 {
 	return PostOperatorStrings[(size_t)postOp];
+}
+
+static BindingPower GetPrecedence(BinaryOperator binOp)
+{
+	return BinaryPrecedence[(size_t)binOp];
+}
+
+static BindingPower GetPrecedence(PreOperator preOp)
+{
+	return PrePrecedence[(size_t)preOp];
+}
+
+static BindingPower GetPrecedence(PostOperator postOp)
+{
+	return PostPrecedence[(size_t)postOp];
 }

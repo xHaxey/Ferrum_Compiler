@@ -20,7 +20,7 @@
 #include <llvm/Support/FileSystem.h>
 #include <llvm/Support/raw_ostream.h>
 
-#include <llvm/TargetParser/Host.h>
+#include <llvm/TargetExprParser/Host.h>
 
 #include <llvm/Target/TargetMachine.h>
 #include <llvm/Target/TargetOptions.h>

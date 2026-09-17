@@ -3,14 +3,9 @@
 #include "SourceRange.h"
 #include <vector>
 #include <variant>
+#include <memory>
 
-struct Parameter
-{
-	SourceRange range;
-
-	Type type;
-	std::string name;
-};
+struct Symbol;
 
 struct VariableInfo
 {
@@ -21,7 +16,7 @@ struct FunctionInfo
 {
 	Type returnType;
 
-	std::vector<Parameter> parameters;
+	std::vector<Symbol*> parameters;
 };
 
 struct Symbol

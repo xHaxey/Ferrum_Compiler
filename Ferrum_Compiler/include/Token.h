@@ -90,6 +90,13 @@ static std::unique_ptr<Token> MakeToken(TokenType type, SourceRange range)
 
 static void PrintToken(Token* token)
 {
+	if (token->Text() == "\n")
+	{
+		std::cout << "TOKEN | NEWLINE"
+			<< " | TYPE: " << TokenTypeToString(token->Type())
+			<< " | Range: " << token->Range().StartPosition() << "." << token->Range().EndPosition() << " | " << token->Range().StartLine() << "." << token->Range().StartColumn() << "," << token->Range().EndColumn() << std::endl;
+		return;
+	}
 	std::cout << "TOKEN | " << token->Text() 
 		<< " | TYPE: " << TokenTypeToString(token->Type()) 
 		<< " | Range: " << token->Range().StartPosition() << "." << token->Range().EndPosition() << " | " << token->Range().StartLine() << "." << token->Range().StartColumn() << "," << token->Range().EndColumn() << std::endl;

@@ -222,7 +222,7 @@ void TypeChecker::Visit(CallExp& exp)
 
 		auto actual = exp.args[i]->resolvedType;
 
-		auto expected = info.parameters[i].type;
+		auto expected = std::get<VariableInfo>(info.parameters[i]->info).valueType;
 
 		if (actual != expected)
 		{

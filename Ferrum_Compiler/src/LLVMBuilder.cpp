@@ -250,7 +250,7 @@ void LLVMBuilder::Visit(FunctionExp& exp)
 
 	for (auto& param : exp.args)
 	{
-		args.push_back(ResolveType(param.type));
+		args.push_back(ResolveType(std::get<VariableInfo>(param->resolvedSymbol->info).valueType));
 	}
 
 	auto funcType = llvm::FunctionType::get(ResolveType(exp.returnType), args, false);
@@ -260,7 +260,7 @@ void LLVMBuilder::Visit(FunctionExp& exp)
 	size_t index = 0;
 	for (auto& arg : function->args())
 	{
-		arg.setName(exp.args[index++].name);
+		arg.setName(exp.args[index++]->resolvedSymbol->name);
 	}
 
 	auto entry = llvm::BasicBlock::Create(m_context, "entry", function);

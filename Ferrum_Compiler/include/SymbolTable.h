@@ -12,7 +12,7 @@ class Scope
 public:
 	Scope* parent = nullptr;
 
-	std::unordered_map<std::string, Symbol> symbols;
+	std::unordered_map<std::string, std::unique_ptr<Symbol>> symbols;
 };
 
 class SymbolTable
@@ -26,7 +26,7 @@ public:
 
 	void ExitScope();
 
-	bool Insert(Symbol symbol);
+	Symbol* Insert(std::unique_ptr<Symbol> symbol);
 
 	bool ExistsInCurrentScope(std::string_view name);
 	bool Exists(std::string_view name);
