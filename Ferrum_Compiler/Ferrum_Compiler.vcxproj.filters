@@ -111,14 +111,17 @@
     <ClInclude Include="include\SourceRange.h">
       <Filter>Header Files\Sources</Filter>
     </ClInclude>
-    <ClInclude Include="Nodes.h">
+    <ClInclude Include="include\Nodes.h">
       <Filter>Header Files\AST</Filter>
     </ClInclude>
-    <ClInclude Include="NodeVisitor.h">
-      <Filter>Header Files\AST</Filter>
-    </ClInclude>
-    <ClInclude Include="NodeParser.h">
+    <ClInclude Include="include\NodeParser.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NodeRule.h">
+      <Filter>Header Files\AST</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NodeFactory.h">
+      <Filter>Header Files\AST</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -146,7 +149,7 @@
     <ClCompile Include="src\SourceRange.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="NodeParser.cpp">
+    <ClCompile Include="src\NodeParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

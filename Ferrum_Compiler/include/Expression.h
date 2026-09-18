@@ -12,11 +12,7 @@
 	X(OPERATOR,		"Operator") \
 	X(PRE,			"Unary Pre") \
 	X(POST,			"Unary Post") \
-	X(ASSIGN,		"Assign") \
-	X(VARDEC,		"Variable Declaration") \
-	X(BLOCK,		"Block") \
-	X(FUNCTION,		"Function") \
-	X(CALL,			"Call") \
+	X(INITIALIZER,	"Initializer") \
 	X(ERROR,		"ERROR")
 
 enum class ExprType

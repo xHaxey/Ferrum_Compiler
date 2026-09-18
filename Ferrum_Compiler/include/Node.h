@@ -3,6 +3,23 @@
 #include "Type.h"
 #include "Symbol.h"
 
+#define MAX_NODES 100
+
+#define NODELIST \
+    X(EXPRESSION,   "Expression") \
+    X(VAR,          "Variable") \
+    X(FUNCTION,      "Function") \
+    X(PARAM,        "Param") \
+    X(RETURN,       "Return") \
+    X(BLOCK,        "Block")
+
+enum class NodeType
+{
+#define X(name, text) name,
+    NODELIST
+#undef X
+};
+
 class Node
 {
 public:
@@ -13,4 +30,3 @@ public:
 	Type resolvedType = Type::INVALID;
 	Symbol* resolvedSymbol = nullptr;
 };
-

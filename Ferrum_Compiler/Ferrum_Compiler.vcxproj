@@ -38,6 +38,10 @@
     <ClInclude Include="include\Lexer.h" />
     <ClInclude Include="include\LLVM.h" />
     <ClInclude Include="include\LLVMBuilder.h" />
+    <ClInclude Include="include\NodeFactory.h" />
+    <ClInclude Include="include\NodeParser.h" />
+    <ClInclude Include="include\NodeRule.h" />
+    <ClInclude Include="include\Nodes.h" />
     <ClInclude Include="include\Operator.h" />
     <ClInclude Include="include\OperatorFunctions.h" />
     <ClInclude Include="include\OperatorHelpers.h" />
@@ -54,17 +58,14 @@
     <ClInclude Include="include\Type.h" />
     <ClInclude Include="include\TypeChecker.h" />
     <ClInclude Include="include\Value.h" />
-    <ClInclude Include="NodeParser.h" />
-    <ClInclude Include="Nodes.h" />
-    <ClInclude Include="NodeVisitor.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="NodeParser.cpp" />
     <ClCompile Include="src\ExprPrinter.cpp" />
     <ClCompile Include="src\ErrorQueue.cpp" />
     <ClCompile Include="src\Lexer.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ExpressionParser.cpp" />
+    <ClCompile Include="src\NodeParser.cpp" />
     <ClCompile Include="src\SourceLocation.cpp" />
     <ClCompile Include="src\SourceManager.cpp" />
     <ClCompile Include="src\SourceRange.cpp" />
