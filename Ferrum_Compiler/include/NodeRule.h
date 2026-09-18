@@ -10,6 +10,7 @@ enum class RuleKind
     EXPRESSION,
     NODE,
     OPERATOR,
+    KEYWORD,
     REPEAT,
     OPTIONAL
 };
@@ -18,13 +19,14 @@ struct ExpressionInfo;
 struct NodeInfo;
 struct RepeatInfo;
 struct OperatorInfo;
+struct KeywordInfo;
 struct OptionalInfo;
 
 struct RuleElement
 {
     RuleKind kind;
 
-    std::variant<ExpressionInfo, NodeInfo, RepeatInfo, OperatorInfo, OptionalInfo> info;
+    std::variant<ExpressionInfo, NodeInfo, RepeatInfo, OperatorInfo, OptionalInfo, KeywordInfo> info;
 
     RuleElement(RuleKind kind, ExpressionInfo info)
         : kind(kind), info(info) {}
@@ -33,6 +35,8 @@ struct RuleElement
     RuleElement(RuleKind kind, RepeatInfo info)
         : kind(kind), info(info) {}
     RuleElement(RuleKind kind, OperatorInfo info)
+        : kind(kind), info(info) {}
+    RuleElement(RuleKind kind, KeywordInfo info)
         : kind(kind), info(info) {}
     RuleElement(RuleKind kind, OptionalInfo info)
         : kind(kind), info(info) {}
@@ -66,6 +70,11 @@ struct OptionalInfo
     std::vector<RuleElement> rules;
 };
 
+struct KeywordInfo
+{
+    Keyword keyword;
+};
+
 static RuleElement Rule(RuleKind kind, ExprType type)
 {
     return { kind, ExpressionInfo(type) };
@@ -85,6 +94,10 @@ static RuleElement Rule(RuleKind kind, std::string op)
 static RuleElement Rule(RuleKind kind, std::vector<RuleElement> rules)
 {
     return { kind, OptionalInfo(rules) };
+}
+static RuleElement Rule(RuleKind kind, Keyword keyword)
+{
+    return { kind, KeywordInfo(keyword) };
 }
 
 struct NodeRule
@@ -122,7 +135,36 @@ NodeRule VarRule =
 }
 };
 
-// BlockNode
-// RetNode
-// ParamNode
-// ExprNode
+NodeRule BlockRule =
+{
+{
+    Rule(RuleKind::REPEAT, 0, MAX_NODES, Rule(RuleKind::NODE, NodeType::ANY))
+}
+};
+
+NodeRule RetRule =
+{
+{
+    Rule(RuleKind::KEYWORD, Keyword::RETURN),
+
+    Rule(RuleKind::EXPRESSION, ExprType::VALUE)
+}
+};
+
+NodeRule ParamRule =
+{
+{
+    Rule(RuleKind::EXPRESSION, ExprType::TYPE),
+
+    Rule(RuleKind::OPERATOR, ":"),
+
+    Rule(RuleKind::EXPRESSION, ExprType::IDENTIFIER),
+}
+};
+
+NodeRule ExprRule =
+{
+{
+    Rule(RuleKind::EXPRESSION, ExprType::VALUE)
+}
+};

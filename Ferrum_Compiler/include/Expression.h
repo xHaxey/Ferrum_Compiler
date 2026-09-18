@@ -13,6 +13,7 @@
 	X(PRE,			"Unary Pre") \
 	X(POST,			"Unary Post") \
 	X(INITIALIZER,	"Initializer") \
+	X(VALUE,		"Value") \
 	X(ERROR,		"ERROR")
 
 enum class ExprType

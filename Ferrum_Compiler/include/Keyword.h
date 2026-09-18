@@ -2,6 +2,7 @@
 #include <string>
 
 #define KEYWORD_LIST \
+	X(RETURN,		"Return") \
 	X(INVALID,		"") 
 
 enum class Keyword
