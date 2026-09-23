@@ -1,45 +1,92 @@
 #pragma once
 #include <string>
+#include <vector>
 
-#define TYPES_LIST \
-	X(INT,		"int") \
-	X(FLOAT,	"float") \
-	X(CHAR,		"char") \
-	X(STRING,	"string") \
-	X(BOOL,		"bool") \
-	X(VOID,		"void") \
-	X(INVALID,	"")
-
-enum class Type
+class Type
 {
-#define X(name, text) name,
-	TYPES_LIST
-#undef X
-};
-
-inline constexpr const char* TypeStrings[] =
-{
-#define X(name, text) text,
-	TYPES_LIST
-#undef X
-};
-
-static std::string TypeToString(Type type)
-{
-	return TypeStrings[(int)type];
-}
-
-static Type StringToType(std::string string)
-{
-	int i = 0;
-	for (auto type : TypeStrings)
+public:
+	enum class Kind
 	{
-		if (type == string)
+		INT,
+		FLOAT,
+		CHAR,
+		STRING,
+		BOOL,
+		VOID,
+		STRUCT,
+		CLASS,
+		INVALID
+	};
+
+public:
+	Type(Kind kind, std::string representation) : kind(kind), representation(representation) {}
+
+	Kind kind;
+
+	std::string representation;
+};
+
+static Type intType = 
+{
+	Type::Kind::INT,
+	"int"
+};
+
+static Type floatType =
+{
+	Type::Kind::INT,
+	"float"
+};
+
+static Type charType =
+{
+	Type::Kind::INT,
+	"char"
+};
+
+static Type stringType =
+{
+	Type::Kind::INT,
+	"string"
+};
+
+static Type boolType =
+{
+	Type::Kind::INT,
+	"bool"
+};
+
+static std::vector<Type*> types = 
+{
+	&intType,
+	&floatType,
+	&charType,
+	&stringType,
+	&boolType
+};
+
+bool IsType(std::string representation)
+{
+	for (auto& type : types)
+	{
+		if (type->representation == representation)
 		{
-			return (Type)i;
+			return true;
 		}
-		i++;
 	}
 
-	return Type::INVALID;
+	return false;
+}
+
+Type* ToType(std::string representation)
+{
+	for (auto& type : types)
+	{
+		if (type->representation == representation)
+		{
+			return type;
+		}
+	}
+
+	return nullptr;
 }
