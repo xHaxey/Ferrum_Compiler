@@ -3,259 +3,230 @@
 
 inline llvm::Value* AddInt(
     llvm::IRBuilder<>& builder,
-    llvm::Value* lhs,
-    llvm::Value* rhs)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateAdd(lhs, rhs);
+    return builder.CreateAdd(values[0], values[1]);
 }
 
 inline llvm::Value* SubInt(
     llvm::IRBuilder<>& builder,
-    llvm::Value* lhs,
-    llvm::Value* rhs)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateSub(lhs, rhs);
+    return builder.CreateSub(values[0], values[1]);
 }
 
 inline llvm::Value* MulInt(
     llvm::IRBuilder<>& builder,
-    llvm::Value* lhs,
-    llvm::Value* rhs)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateMul(lhs, rhs);
+    return builder.CreateMul(values[0], values[1]);
 }
 
 inline llvm::Value* DivInt(
     llvm::IRBuilder<>& builder,
-    llvm::Value* lhs,
-    llvm::Value* rhs)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateSDiv(lhs, rhs);
+    return builder.CreateSDiv(values[0], values[1]);
 }
 
 inline llvm::Value* ModInt(
     llvm::IRBuilder<>& builder,
-    llvm::Value* lhs,
-    llvm::Value* rhs)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateSRem(lhs, rhs);
+    return builder.CreateSRem(values[0], values[1]);
 }
 
 inline llvm::Value* AddFloat(
     llvm::IRBuilder<>& builder,
-    llvm::Value* lhs,
-    llvm::Value* rhs)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateFAdd(lhs, rhs);
+    return builder.CreateFAdd(values[0], values[1]);
 }
 
 inline llvm::Value* SubFloat(
     llvm::IRBuilder<>& builder,
-    llvm::Value* lhs,
-    llvm::Value* rhs)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateFSub(lhs, rhs);
+    return builder.CreateFSub(values[0], values[1]);
 }
 
 inline llvm::Value* MulFloat(
     llvm::IRBuilder<>& builder,
-    llvm::Value* lhs,
-    llvm::Value* rhs)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateFMul(lhs, rhs);
+    return builder.CreateFMul(values[0], values[1]);
 }
 
 inline llvm::Value* DivFloat(
     llvm::IRBuilder<>& builder,
-    llvm::Value* lhs,
-    llvm::Value* rhs)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateFDiv(lhs, rhs);
+    return builder.CreateFDiv(values[0], values[1]);
 }
 
 inline llvm::Value* ModFloat(
     llvm::IRBuilder<>& builder,
-    llvm::Value* lhs,
-    llvm::Value* rhs)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateFRem(lhs, rhs);
+    return builder.CreateFRem(values[0], values[1]);
 }
 
 inline llvm::Value* GreaterInt(
     llvm::IRBuilder<>& builder,
-    llvm::Value* lhs,
-    llvm::Value* rhs)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateICmpSGT(lhs,rhs);
+    return builder.CreateICmpSGT(values[0], values[1]);
 }
 
 inline llvm::Value* GreaterEqualInt(
     llvm::IRBuilder<>& builder,
-    llvm::Value* lhs,
-    llvm::Value* rhs)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateICmpSGE(lhs, rhs);
+    return builder.CreateICmpSGE(values[0], values[1]);
 }
 
 inline llvm::Value* LesserInt(
     llvm::IRBuilder<>& builder,
-    llvm::Value* lhs,
-    llvm::Value* rhs)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateICmpSLT(lhs, rhs);
+    return builder.CreateICmpSLT(values[0], values[1]);
 }
 
 inline llvm::Value* LesserEqualInt(
     llvm::IRBuilder<>& builder,
-    llvm::Value* lhs,
-    llvm::Value* rhs)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateICmpSLE(lhs, rhs);
+    return builder.CreateICmpSLE(values[0], values[1]);
 }
 
 inline llvm::Value* EqualInt(
     llvm::IRBuilder<>& builder,
-    llvm::Value* lhs,
-    llvm::Value* rhs)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateICmpEQ(lhs, rhs);
+    return builder.CreateICmpEQ(values[0], values[1]);
 }
 
 inline llvm::Value* NotEqualInt(
     llvm::IRBuilder<>& builder,
-    llvm::Value* lhs,
-    llvm::Value* rhs)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateICmpNE(lhs, rhs);
+    return builder.CreateICmpNE(values[0], values[1]);
 }
 
 inline llvm::Value* GreaterFloat(
     llvm::IRBuilder<>& builder,
-    llvm::Value* lhs,
-    llvm::Value* rhs)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateFCmpOGT(lhs, rhs);
+    return builder.CreateFCmpOGT(values[0], values[1]);
 }
 
 inline llvm::Value* GreaterEqualFloat(
     llvm::IRBuilder<>& builder,
-    llvm::Value* lhs,
-    llvm::Value* rhs)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateFCmpOGE(lhs, rhs);
+    return builder.CreateFCmpOGE(values[0], values[1]);
 }
 
 inline llvm::Value* LesserFloat(
     llvm::IRBuilder<>& builder,
-    llvm::Value* lhs,
-    llvm::Value* rhs)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateFCmpOLT(lhs, rhs);
+    return builder.CreateFCmpOLT(values[0], values[1]);
 }
 
 inline llvm::Value* LesserEqualFloat(
     llvm::IRBuilder<>& builder,
-    llvm::Value* lhs,
-    llvm::Value* rhs)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateFCmpOLE(lhs, rhs);
+    return builder.CreateFCmpOLE(values[0], values[1]);
 }
 
 inline llvm::Value* EqualFloat(
     llvm::IRBuilder<>& builder,
-    llvm::Value* lhs,
-    llvm::Value* rhs)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateFCmpOEQ(lhs, rhs);
+    return builder.CreateFCmpOEQ(values[0], values[1]);
 }
 
 inline llvm::Value* NotEqualFloat(
     llvm::IRBuilder<>& builder,
-    llvm::Value* lhs,
-    llvm::Value* rhs)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateFCmpONE(lhs, rhs);
+    return builder.CreateFCmpONE(values[0], values[1]);
 }
 
 inline llvm::Value* LogicalAnd(
     llvm::IRBuilder<>& builder,
-    llvm::Value* lhs,
-    llvm::Value* rhs)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateAnd(lhs,rhs);
+    return builder.CreateAnd(values[0], values[1]);
 }
 
 inline llvm::Value* LogicalOr(
     llvm::IRBuilder<>& builder,
-    llvm::Value* lhs,
-    llvm::Value* rhs)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateOr(lhs, rhs);
+    return builder.CreateOr(values[0], values[1]);
 }
 
 inline llvm::Value* IncInt(
     llvm::IRBuilder<>& builder,
-    llvm::Value* value
-)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateAdd(value, llvm::ConstantInt::get(llvm::Type::getInt32Ty(builder.getContext()), 1));
+    return builder.CreateAdd(values[0], llvm::ConstantInt::get(llvm::Type::getInt32Ty(builder.getContext()), 1));
 }
 
 inline llvm::Value* DecInt(
     llvm::IRBuilder<>& builder,
-    llvm::Value* value
-)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateSub(value, llvm::ConstantInt::get(llvm::Type::getInt32Ty(builder.getContext()), 1));
+    return builder.CreateSub(values[0], llvm::ConstantInt::get(llvm::Type::getInt32Ty(builder.getContext()), 1));
 }
 
 inline llvm::Value* IncFloat(
     llvm::IRBuilder<>& builder,
-    llvm::Value* value
-)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateFAdd(value, llvm::ConstantFP::get(llvm::Type::getFloatTy(builder.getContext()), 1.0));
+    return builder.CreateFAdd(values[0], llvm::ConstantFP::get(llvm::Type::getFloatTy(builder.getContext()), 1.0));
 }
 
 inline llvm::Value* DecFloat(
     llvm::IRBuilder<>& builder,
-    llvm::Value* value
-)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateFSub(value, llvm::ConstantFP::get(llvm::Type::getFloatTy(builder.getContext()), 1.0));
+    return builder.CreateFSub(values[0], llvm::ConstantFP::get(llvm::Type::getFloatTy(builder.getContext()), 1.0));
 }
 inline llvm::Value* PosInt(
     llvm::IRBuilder<>& builder,
-    llvm::Value* value
-)
+    std::vector<llvm::Value*> values)
 {
-    return value;
+    return values[0];
 }
 
 inline llvm::Value* PosFloat(
     llvm::IRBuilder<>& builder,
-    llvm::Value* value)
+    std::vector<llvm::Value*> values)
 {
-    return value;
+    return values[0];
 }
 
 inline llvm::Value* NegInt(
     llvm::IRBuilder<>& builder,
-    llvm::Value* value)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateNeg(value);
+    return builder.CreateNeg(values[0]);
 }
 
 inline llvm::Value* NegFloat(
     llvm::IRBuilder<>& builder,
-    llvm::Value* value)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateFNeg(value);
+    return builder.CreateFNeg(values[0]);
 }
 
 inline llvm::Value* NotBool(
     llvm::IRBuilder<>& builder,
-    llvm::Value* value)
+    std::vector<llvm::Value*> values)
 {
-    return builder.CreateNot(value);
+    return builder.CreateNot(values[0]);
 }

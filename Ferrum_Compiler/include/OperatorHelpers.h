@@ -1,16 +1,31 @@
 #pragma once
 #include "Type.h"
-#include "Operator.h"
 #include "OperatorFunctions.h"
 
-using BinaryCodegenFunc = llvm::Value* (*)(llvm::IRBuilder<>&, llvm::Value*, llvm::Value*);
-using UnaryCodegenFunc = llvm::Value* (*)(llvm::IRBuilder<>&, llvm::Value*);
+using OperatorCodegenFunc = llvm::Value* (*)(llvm::IRBuilder<>&, std::vector<llvm::Value*>);
 
-struct BinaryOperatorRule
+class OperatorRule
 {
+public:
+	OperatorRule(
+		std::vector<Type> operands, 
+		Type result, 
+		OperatorCodegenFunc codegen, 
+		bool modifiesOperand
+	) : 
+		operands(operands), 
+		result(result), 
+		codegen(codegen), 
+		modifiesOperand(modifiesOperand) 
+	{}
+
+	std::vector<Type> operands;
+
 	Type result;
 
-	BinaryCodegenFunc codegen;
+	OperatorCodegenFunc codegen;
+
+	bool modifiesOperand;
 
 	bool Valid() const
 	{
@@ -18,406 +33,74 @@ struct BinaryOperatorRule
 	}
 };
 
-struct UnaryOperatorRule
-{
-	Type result;
+static OperatorRule addIntInt =			{ {Type::INT, Type::INT},		Type::INT,		&AddInt,		false };
+static OperatorRule addIntFloat =		{ {Type::INT, Type::FLOAT},		Type::FLOAT,	&AddFloat,		false };
+static OperatorRule addFloatInt =		{ {Type::FLOAT, Type::INT},		Type::FLOAT,	&AddFloat,		false };
+static OperatorRule addFloatFloat =		{ {Type::FLOAT, Type::FLOAT},	Type::FLOAT,	&AddFloat,		false };
 
-	UnaryCodegenFunc codegen;
+static OperatorRule subIntInt =			{ {Type::INT, Type::INT},		Type::INT,		&SubInt,		false };
+static OperatorRule subIntFloat =		{ {Type::INT, Type::FLOAT},		Type::FLOAT,	&SubFloat,		false };
+static OperatorRule subFloatInt =		{ {Type::FLOAT, Type::INT},		Type::FLOAT,	&SubFloat,		false };
+static OperatorRule subFloatFloat =		{ {Type::FLOAT, Type::FLOAT},	Type::FLOAT,	&SubFloat,		false };
 
-	bool modifesOperand;
+static OperatorRule mulIntInt =			{ {Type::INT, Type::INT},		Type::INT,		&MulInt,		false };
+static OperatorRule mulIntFloat =		{ {Type::INT, Type::FLOAT},		Type::FLOAT,	&MulFloat,		false };
+static OperatorRule mulFloatInt =		{ {Type::FLOAT, Type::INT},		Type::FLOAT,	&MulFloat,		false };
+static OperatorRule mulFloatFloat =		{ {Type::FLOAT, Type::FLOAT},	Type::FLOAT,	&MulFloat,		false };
 
-	bool Valid() const
-	{
-		return result != Type::INVALID;
-	}
-};
+static OperatorRule divIntInt =			{ {Type::INT, Type::INT},		Type::INT,		&DivInt,		false };
+static OperatorRule divIntFloat =		{ {Type::INT, Type::FLOAT},		Type::FLOAT,	&DivFloat,		false };
+static OperatorRule divFloatInt =		{ {Type::FLOAT, Type::INT},		Type::FLOAT,	&DivFloat,		false };
+static OperatorRule divFloatFloat =		{ {Type::FLOAT, Type::FLOAT},	Type::FLOAT,	&DivFloat,		false };
 
-constexpr size_t TYPES = static_cast<size_t>(Type::INVALID);
+static OperatorRule modIntInt =			{ {Type::INT, Type::INT},		Type::INT,		&ModInt,		false };
+static OperatorRule modIntFloat =		{ {Type::INT, Type::FLOAT},		Type::FLOAT,	&ModFloat,		false };
+static OperatorRule modFloatInt =		{ {Type::FLOAT, Type::INT},		Type::FLOAT,	&ModFloat,		false };
+static OperatorRule modFloatFloat =		{ {Type::FLOAT, Type::FLOAT},	Type::FLOAT,	&ModFloat,		false };
 
-static constexpr BinaryOperatorRule InvalidBinaryRule
-{
-	Type::INVALID
-};
+static OperatorRule grIntInt =			{ {Type::INT, Type::INT},		Type::INT,		&GreaterInt,	false };
+static OperatorRule grIntFloat =		{ {Type::INT, Type::FLOAT},		Type::FLOAT,	&GreaterFloat,	false };
+static OperatorRule grFloatInt =		{ {Type::FLOAT, Type::INT},		Type::FLOAT,	&GreaterFloat,	false };
+static OperatorRule grFloatFloat =		{ {Type::FLOAT, Type::FLOAT},	Type::FLOAT,	&GreaterFloat,	false };
 
-static constexpr UnaryOperatorRule InvalidUnaryRule
-{
-	Type::INVALID
-};
+static OperatorRule greIntInt =			{ {Type::INT, Type::INT},		Type::INT,		&GreaterEqualInt,	false };
+static OperatorRule greIntFloat =		{ {Type::INT, Type::FLOAT},		Type::FLOAT,	&GreaterEqualFloat,	false };
+static OperatorRule greFloatInt =		{ {Type::FLOAT, Type::INT},		Type::FLOAT,	&GreaterEqualFloat,	false };
+static OperatorRule greFloatFloat =		{ {Type::FLOAT, Type::FLOAT},	Type::FLOAT,	&GreaterEqualFloat,	false };
 
-// +
-static constexpr BinaryOperatorRule AddMatrix[TYPES][TYPES] =
-{	//			INT							FLOAT						CHAR						STRING						BOOL						VOID
-	/*INT*/		{{Type::INT, &AddInt},		{Type::FLOAT, &AddFloat},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*FLOAT*/	{{Type::FLOAT, &AddFloat},	{Type::FLOAT, &AddFloat},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*CHAR*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*STRING*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*BOOL*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*VOID*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}}
-};
+static OperatorRule lsIntInt =			{ {Type::INT, Type::INT},		Type::INT,		&LesserInt,		false };
+static OperatorRule lsIntFloat =		{ {Type::INT, Type::FLOAT},		Type::FLOAT,	&LesserFloat,	false };
+static OperatorRule lsFloatInt =		{ {Type::FLOAT, Type::INT},		Type::FLOAT,	&LesserFloat,	false };
+static OperatorRule lsFloatFloat =		{ {Type::FLOAT, Type::FLOAT},	Type::FLOAT,	&LesserFloat,	false };
 
-// -
-static constexpr BinaryOperatorRule SubMatrix[TYPES][TYPES] =
-{	//			INT							FLOAT						CHAR						STRING						BOOL						VOID
-	/*INT*/		{{Type::INT, &SubInt},		{Type::FLOAT, &SubFloat},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*FLOAT*/	{{Type::FLOAT, &SubFloat},	{Type::FLOAT, &SubFloat},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*CHAR*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*STRING*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*BOOL*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*VOID*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}}
-};
+static OperatorRule lseIntInt =			{ {Type::INT, Type::INT},		Type::INT,		&LesserEqualInt,	false };
+static OperatorRule lseIntFloat =		{ {Type::INT, Type::FLOAT},		Type::FLOAT,	&LesserEqualFloat,	false };
+static OperatorRule lseFloatInt =		{ {Type::FLOAT, Type::INT},		Type::FLOAT,	&LesserEqualFloat,	false };
+static OperatorRule lseFloatFloat =		{ {Type::FLOAT, Type::FLOAT},	Type::FLOAT,	&LesserEqualFloat,	false };
 
-// *
-static constexpr BinaryOperatorRule MultiMatrix[TYPES][TYPES] =
-{	//			INT							FLOAT						CHAR						STRING						BOOL						VOID
-		/*INT*/		{{Type::INT, &MulInt},		{Type::FLOAT, &MulFloat},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-		/*FLOAT*/	{{Type::FLOAT, &MulFloat},	{Type::FLOAT, &MulFloat},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-		/*CHAR*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-		/*STRING*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-		/*BOOL*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-		/*VOID*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}}
-};
+static OperatorRule eqIntInt =			{ {Type::INT, Type::INT},		Type::INT,		&EqualInt,		false };
+static OperatorRule eqIntFloat =		{ {Type::INT, Type::FLOAT},		Type::FLOAT,	&EqualFloat,	false };
+static OperatorRule eqFloatInt =		{ {Type::FLOAT, Type::INT},		Type::FLOAT,	&EqualFloat,	false };
+static OperatorRule eqFloatFloat =		{ {Type::FLOAT, Type::FLOAT},	Type::FLOAT,	&EqualFloat,	false };
 
-// /
-static constexpr BinaryOperatorRule DivMatrix[TYPES][TYPES] =
-{	//			INT							FLOAT						CHAR						STRING						BOOL						VOID
-	/*INT*/		{{Type::INT, &DivInt},		{Type::FLOAT, &DivFloat},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*FLOAT*/	{{Type::FLOAT, &DivFloat},	{Type::FLOAT, &DivFloat},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*CHAR*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*STRING*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*BOOL*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*VOID*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}}
-};
+static OperatorRule neqIntInt =			{ {Type::INT, Type::INT},		Type::INT,		&NotEqualInt,	false };
+static OperatorRule neqIntFloat =		{ {Type::INT, Type::FLOAT},		Type::FLOAT,	&NotEqualFloat,	false };
+static OperatorRule neqFloatInt =		{ {Type::FLOAT, Type::INT},		Type::FLOAT,	&NotEqualFloat,	false };
+static OperatorRule neqFloatFloat =		{ {Type::FLOAT, Type::FLOAT},	Type::FLOAT,	&NotEqualFloat,	false };
 
-// %
-static constexpr BinaryOperatorRule ModMatrix[TYPES][TYPES] =
-{	//			INT							FLOAT						CHAR						STRING						BOOL						VOID
-	/*INT*/		{{Type::INT, &ModInt},		{Type::FLOAT, &ModFloat},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*FLOAT*/	{{Type::FLOAT, &ModFloat},	{Type::FLOAT, &ModFloat},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*CHAR*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*STRING*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*BOOL*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*VOID*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}}
-};
+static OperatorRule andBoolBool =		{ {Type::BOOL, Type::BOOL},		Type::BOOL,		&LogicalAnd,	false };
+static OperatorRule orBoolBool =		{ {Type::BOOL, Type::BOOL},		Type::BOOL,		&LogicalOr,		false };
 
-// >
-static constexpr BinaryOperatorRule GreaterMatrix[TYPES][TYPES] =
-{	//			INT								FLOAT							CHAR						STRING						BOOL						VOID
-	/*INT*/		{{Type::BOOL, &GreaterInt},		{Type::BOOL, &GreaterFloat},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*FLOAT*/	{{Type::BOOL, &GreaterFloat},	{Type::BOOL, &GreaterFloat},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*CHAR*/	{{Type::INVALID, nullptr},		{Type::INVALID, nullptr},		{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*STRING*/	{{Type::INVALID, nullptr},		{Type::INVALID, nullptr},		{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*BOOL*/	{{Type::INVALID, nullptr},		{Type::INVALID, nullptr},		{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*VOID*/	{{Type::INVALID, nullptr},		{Type::INVALID, nullptr},		{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}}
-};
+static OperatorRule incInt =			{ {Type::INT},					Type::INT,		&IncInt,		true };
+static OperatorRule incFloat =			{ {Type::FLOAT},				Type::FLOAT,	&IncFloat,		true };
 
-// >=
-static constexpr BinaryOperatorRule GreaterEqualMatrix[TYPES][TYPES] =
-{	//			INT									FLOAT								CHAR						STRING						BOOL						VOID
-	/*INT*/		{{Type::BOOL, &GreaterEqualInt},	{Type::BOOL, &GreaterEqualFloat},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*FLOAT*/	{{Type::BOOL, &GreaterEqualFloat},	{Type::BOOL, &GreaterEqualFloat},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*CHAR*/	{{Type::INVALID, nullptr},			{Type::INVALID, nullptr},			{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*STRING*/	{{Type::INVALID, nullptr},			{Type::INVALID, nullptr},			{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*BOOL*/	{{Type::INVALID, nullptr},			{Type::INVALID, nullptr},			{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*VOID*/	{{Type::INVALID, nullptr},			{Type::INVALID, nullptr},			{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}}
-};
+static OperatorRule decInt =			{ {Type::INT},					Type::INT,		&DecInt,		true };
+static OperatorRule decFloat =			{ {Type::FLOAT},				Type::FLOAT,	&DecFloat,		true };
 
-// <
-static constexpr BinaryOperatorRule LesserMatrix[TYPES][TYPES] =
-{	//			INT								FLOAT						CHAR						STRING						BOOL						VOID
-	/*INT*/		{{Type::BOOL, &LesserInt},		{Type::BOOL, &LesserFloat},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*FLOAT*/	{{Type::BOOL, &LesserFloat},	{Type::BOOL, &LesserFloat},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*CHAR*/	{{Type::INVALID, nullptr},		{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*STRING*/	{{Type::INVALID, nullptr},		{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*BOOL*/	{{Type::INVALID, nullptr},		{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*VOID*/	{{Type::INVALID, nullptr},		{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}}
-};
+static OperatorRule posInt =			{ {Type::INT},					Type::INT,		&PosInt,		true };
+static OperatorRule posFloat =			{ {Type::FLOAT},				Type::FLOAT,	&PosFloat,		true };
 
-// <=
-static constexpr BinaryOperatorRule LesserEqualMatrix[TYPES][TYPES] =
-{	//			INT									FLOAT								CHAR						STRING						BOOL						VOID
-	/*INT*/		{{Type::BOOL, &LesserEqualInt},		{Type::BOOL, &LesserEqualFloat},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*FLOAT*/	{{Type::BOOL, &LesserEqualFloat},	{Type::BOOL, &LesserEqualFloat},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*CHAR*/	{{Type::INVALID, nullptr},			{Type::INVALID, nullptr},			{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*STRING*/	{{Type::INVALID, nullptr},			{Type::INVALID, nullptr},			{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*BOOL*/	{{Type::INVALID, nullptr},			{Type::INVALID, nullptr},			{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*VOID*/	{{Type::INVALID, nullptr},			{Type::INVALID, nullptr},			{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}}
-};
+static OperatorRule negInt =			{ {Type::INT},					Type::INT,		&NegInt,		true };
+static OperatorRule negFloat =			{ {Type::FLOAT},				Type::FLOAT,	&NegFloat,		true };
 
-// ==
-static constexpr BinaryOperatorRule EqualityMatrix[TYPES][TYPES] =
-{	//			INT							FLOAT						CHAR						STRING						BOOL						VOID
-	/*INT*/		{{Type::BOOL, &EqualInt},	{Type::BOOL, &EqualFloat},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*FLOAT*/	{{Type::BOOL, &EqualFloat},	{Type::BOOL, &EqualFloat},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*CHAR*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*STRING*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*BOOL*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*VOID*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}}
-};
-
-// !=
-static constexpr BinaryOperatorRule NotEqualityMatrix[TYPES][TYPES] =
-{	//			INT								FLOAT							CHAR						STRING						BOOL						VOID
-	/*INT*/		{{Type::BOOL, &NotEqualInt},	{Type::BOOL, &NotEqualFloat},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*FLOAT*/	{{Type::BOOL, &NotEqualFloat},	{Type::BOOL, &NotEqualFloat},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*CHAR*/	{{Type::INVALID, nullptr},		{Type::INVALID, nullptr},		{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*STRING*/	{{Type::INVALID, nullptr},		{Type::INVALID, nullptr},		{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*BOOL*/	{{Type::INVALID, nullptr},		{Type::INVALID, nullptr},		{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*VOID*/	{{Type::INVALID, nullptr},		{Type::INVALID, nullptr},		{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}}
-};
-
-// &&
-static constexpr BinaryOperatorRule LogicalANDMatrix[TYPES][TYPES] =
-{	//			INT							FLOAT						CHAR						STRING						BOOL						VOID
-	/*INT*/		{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*FLOAT*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*CHAR*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*STRING*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*BOOL*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::BOOL, &LogicalAnd},	{Type::INVALID, nullptr}},
-	/*VOID*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}}
-};
-
-// ||
-static constexpr BinaryOperatorRule LogicalORMatrix[TYPES][TYPES] =
-{	//			INT							FLOAT						CHAR						STRING						BOOL						VOID
-	/*INT*/		{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*FLOAT*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*CHAR*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*STRING*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}},
-	/*BOOL*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::BOOL, &LogicalOr},	{Type::INVALID, nullptr}},
-	/*VOID*/	{{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr},	{Type::INVALID, nullptr}}
-};
-
-// +
-static constexpr UnaryOperatorRule UnaryPOSArithmetic[TYPES]
-{
-	/*INT*/		{Type::INT, &PosInt, false},
-	/*FLOAT*/	{Type::FLOAT, &PosFloat, false},
-	/*CHAR*/	{Type::INVALID, nullptr, false},
-	/*STRING*/	{Type::INVALID, nullptr, false},
-	/*BOOL*/	{Type::INVALID, nullptr, false},
-	/*INVALID*/	{Type::INVALID, nullptr, false}
-};
-
-// -
-static constexpr UnaryOperatorRule UnaryNEGArithmetic[TYPES]
-{
-	/*INT*/		{Type::INT, &NegInt, false},
-	/*FLOAT*/	{Type::FLOAT, &NegFloat, false},
-	/*CHAR*/	{Type::INVALID, nullptr, false},
-	/*STRING*/	{Type::INVALID, nullptr, false},
-	/*BOOL*/	{Type::INVALID, nullptr, false},
-	/*INVALID*/	{Type::INVALID, nullptr, false}
-};
-
-// !
-static constexpr UnaryOperatorRule UnaryNOTLogical[TYPES]
-{
-	/*INT*/		{Type::INVALID, nullptr, false},
-	/*FLOAT*/	{Type::INVALID, nullptr, false},
-	/*CHAR*/	{Type::INVALID, nullptr, false},
-	/*STRING*/	{Type::INVALID, nullptr, false},
-	/*BOOL*/	{Type::BOOL, &NotBool, false},
-	/*VOID*/	{Type::INVALID, nullptr, false}
-};
-
-// ++
-static constexpr UnaryOperatorRule UnaryPreIncrementMatrix[TYPES]
-{
-	/*INT*/		{Type::INT, &IncInt, true},
-	/*FLOAT*/	{Type::FLOAT, &IncFloat, true},
-	/*CHAR*/	{Type::INVALID, nullptr, true},
-	/*STRING*/	{Type::INVALID, nullptr, true},
-	/*BOOL*/	{Type::INVALID, nullptr, true},
-	/*VOID*/	{Type::INVALID, nullptr, true}
-};
-
-// --
-static constexpr UnaryOperatorRule UnaryPreDecrementMatrix[TYPES]
-{
-	/*INT*/		{Type::INT, &DecInt, true},
-	/*FLOAT*/	{Type::FLOAT, &DecFloat, true},
-	/*CHAR*/	{Type::INVALID, nullptr, true},
-	/*STRING*/	{Type::INVALID, nullptr, true},
-	/*BOOL*/	{Type::INVALID, nullptr, true},
-	/*VOID*/	{Type::INVALID, nullptr, true}
-};
-
-static constexpr UnaryOperatorRule UnaryPostIncrementMatrix[TYPES]
-{
-	/*INT*/		{Type::INT, &IncInt, true},
-	/*FLOAT*/	{Type::FLOAT, &IncFloat, true},
-	/*CHAR*/	{Type::INVALID, nullptr, true},
-	/*STRING*/	{Type::INVALID, nullptr, true},
-	/*BOOL*/	{Type::INVALID, nullptr, true},
-	/*VOID*/	{Type::INVALID, nullptr, true}
-};
-
-// --
-static constexpr UnaryOperatorRule UnaryPostDecrementMatrix[TYPES]
-{
-	/*INT*/		{Type::INT, &DecInt, true},
-	/*FLOAT*/	{Type::FLOAT, &DecFloat, true},
-	/*CHAR*/	{Type::INVALID, nullptr, true},
-	/*STRING*/	{Type::INVALID, nullptr, true},
-	/*BOOL*/	{Type::INVALID, nullptr, true},
-	/*VOID*/	{Type::INVALID, nullptr, true}
-};
-
-static BinaryOperator AssignToBinary(BinaryOperator op)
-{
-	switch (op)
-	{
-	case BinaryOperator::ADD_ASSIGN:
-	{
-		return BinaryOperator::ADD;
-	}
-	case BinaryOperator::SUB_ASSIGN:
-	{
-		return BinaryOperator::SUB;
-	}
-	case BinaryOperator::MULTI_ASSIGN:
-	{
-		return BinaryOperator::MULTI;
-	}
-	case BinaryOperator::DIV_ASSIGN:
-	{
-		return BinaryOperator::DIV;
-	}
-	case BinaryOperator::MOD_ASSIGN:
-	{
-		return BinaryOperator::MOD;
-	}
-	default:
-	{
-		return BinaryOperator::INVALID;
-	}
-	}
-}
-
-static const BinaryOperatorRule& GetBinaryRule(BinaryOperator op, Type lhs, Type rhs)
-{
-	if (lhs == Type::INVALID || rhs == Type::INVALID)
-	{
-		return InvalidBinaryRule;
-	}
-
-	switch (op)
-	{
-	case BinaryOperator::ADD:
-	{
-		return AddMatrix[(size_t)lhs][(size_t)rhs];
-	}
-	case BinaryOperator::SUB:
-	{
-		return SubMatrix[(size_t)lhs][(size_t)rhs];
-	}
-	case BinaryOperator::MULTI:
-	{
-		return MultiMatrix[(size_t)lhs][(size_t)rhs];
-	}
-	case BinaryOperator::DIV:
-	{
-		return DivMatrix[(size_t)lhs][(size_t)rhs];
-	}
-	case BinaryOperator::MOD:
-	{
-		return ModMatrix[(size_t)lhs][(size_t)rhs];
-	}
-	case BinaryOperator::GR:
-	{
-		return GreaterMatrix[(size_t)lhs][(size_t)rhs];
-	}
-	case BinaryOperator::GRE:
-	{
-		return GreaterEqualMatrix[(size_t)lhs][(size_t)rhs];
-	}
-	case BinaryOperator::LS:
-	{
-		return LesserMatrix[(size_t)lhs][(size_t)rhs];
-	}
-	case BinaryOperator::LSE:
-	{
-		return LesserEqualMatrix[(size_t)lhs][(size_t)rhs];
-	}
-	case BinaryOperator::EQ:
-	{
-		return EqualityMatrix[(size_t)lhs][(size_t)rhs];
-	}
-	case BinaryOperator::NEQ:
-	{
-		return NotEqualityMatrix[(size_t)lhs][(size_t)rhs];
-	}
-	case BinaryOperator::LOG_AND:
-	{
-		return LogicalANDMatrix[(size_t)lhs][(size_t)rhs];
-	}
-	case BinaryOperator::LOG_OR:
-	{
-		return LogicalORMatrix[(size_t)lhs][(size_t)rhs];
-	}
-	default:
-	{
-		return InvalidBinaryRule;
-	}
-	}
-}
-
-static const UnaryOperatorRule& GetUnaryPreRule(PreOperator op, Type operand)
-{
-	if (operand == Type::INVALID)
-	{
-		return InvalidUnaryRule;
-	}
-
-	switch (op)
-	{
-	case PreOperator::POS:
-	{
-		return UnaryPOSArithmetic[(size_t)operand];
-	}
-	case PreOperator::NEG:
-	{
-		return UnaryNEGArithmetic[(size_t)operand];
-	}
-	case PreOperator::LOG_NOT:
-	{
-		return UnaryNOTLogical[(size_t)operand];
-	}
-	case PreOperator::PRE_DEC:
-	{
-		return UnaryPreDecrementMatrix[(size_t)operand];
-	}
-	case PreOperator::PRE_INC:
-	{
-		return UnaryPreIncrementMatrix[(size_t)operand];
-	}
-	default:
-	{
-		return InvalidUnaryRule;
-	}
-	}
-}
-
-static const UnaryOperatorRule& GetUnaryPostRule(PostOperator op, Type operand)
-{
-	if (operand == Type::INVALID)
-	{
-		return InvalidUnaryRule;
-	}
-
-	switch (op)
-	{
-	case PostOperator::POST_DEC:
-	{
-		return UnaryPostDecrementMatrix[(size_t)operand];
-	}
-	case PostOperator::POST_INC:
-	{
-		return UnaryPostIncrementMatrix[(size_t)operand];
-	}
-	default:
-	{
-		return InvalidUnaryRule;
-	}
-	}
-}
+static OperatorRule notBool =			{ {Type::BOOL},					Type::BOOL,		&NotBool,		false };

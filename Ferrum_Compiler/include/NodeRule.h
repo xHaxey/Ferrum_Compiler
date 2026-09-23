@@ -107,7 +107,7 @@ struct NodeRule
     NodeRule(std::vector<RuleElement> elements) : elements(elements) {}
 };
 
-NodeRule FunctionRule =
+static const NodeRule FunctionRule =
 {
 {
     Rule(RuleKind::EXPRESSION, ExprType::TYPE),
@@ -122,7 +122,7 @@ NodeRule FunctionRule =
 }
 };
 
-NodeRule VarRule =
+static const NodeRule VarRule =
 {
 {
     Rule(RuleKind::EXPRESSION, ExprType::TYPE),
@@ -135,14 +135,14 @@ NodeRule VarRule =
 }
 };
 
-NodeRule BlockRule =
+static const NodeRule BlockRule =
 {
 {
     Rule(RuleKind::REPEAT, 0, MAX_NODES, Rule(RuleKind::NODE, NodeType::ANY))
 }
 };
 
-NodeRule RetRule =
+static const NodeRule RetRule =
 {
 {
     Rule(RuleKind::KEYWORD, Keyword::RETURN),
@@ -151,7 +151,7 @@ NodeRule RetRule =
 }
 };
 
-NodeRule ParamRule =
+static const NodeRule ParamRule =
 {
 {
     Rule(RuleKind::EXPRESSION, ExprType::TYPE),
@@ -162,7 +162,7 @@ NodeRule ParamRule =
 }
 };
 
-NodeRule ExprRule =
+static const NodeRule ExprRule =
 {
 {
     Rule(RuleKind::EXPRESSION, ExprType::VALUE)

@@ -8,11 +8,19 @@
 
 class ExprNode : public Node
 {
+public: 
+	ExprNode(std::unique_ptr<Expression> expr) : expr(std::move(expr)), Node(expr->range) {}
+
 	std::unique_ptr<Expression> expr;
 };
 
 class VarNode : public Node
 {
+	VarNode(Type type, std::string identifier) : type(type), identifier(std::move(identifier)), Node(Source)
+	VarNode(Type type, std::string identifier, std::unique_ptr<Expression> initializer) : type(type), identifier(std::move(identifier))
+	{
+		Node(initializer->range);
+	}
 	Type type;
 	std::string identifier;
 
