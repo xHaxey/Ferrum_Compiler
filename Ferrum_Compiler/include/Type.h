@@ -65,7 +65,7 @@ static std::vector<Type*> types =
 	&boolType
 };
 
-bool IsType(std::string representation)
+static bool IsType(std::string representation)
 {
 	for (auto& type : types)
 	{
@@ -78,7 +78,7 @@ bool IsType(std::string representation)
 	return false;
 }
 
-Type* ToType(std::string representation)
+static Type* ToType(std::string representation)
 {
 	for (auto& type : types)
 	{

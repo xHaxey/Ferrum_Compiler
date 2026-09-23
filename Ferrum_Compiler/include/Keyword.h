@@ -1,40 +1,47 @@
 #pragma once
 #include <string>
+#include <vector>
 
-#define KEYWORD_LIST \
-	X(RETURN,		"Return") \
-	X(INVALID,		"") 
-
-enum class Keyword
+class Keyword
 {
-#define X(name, text) name,
-	KEYWORD_LIST
-#undef X
-};
-
-inline constexpr const char* KeywordStrings[] =
-{
-#define X(name, text) text,
-	KEYWORD_LIST
-#undef X
-};
-
-static Keyword StringToKeyword(std::string string)
-{
-	int i = 0;
-	for (auto keyword : KeywordStrings)
+public:
+	enum class Kind
 	{
-		if (string == keyword)
+		RETURN,
+		INVALID
+	};
+
+	Kind kind;
+
+	std::string representation;
+};
+
+static Keyword returnKeyword = { Keyword::Kind::RETURN, "return" };
+
+static std::vector<Keyword*> keywords = { &returnKeyword };
+
+static bool IsKeyword(std::string representation)
+{
+	for (auto keyword : keywords)
+	{
+		if (representation == keyword->representation)
 		{
-			return (Keyword)i;
+			return true;
 		}
-		i++;
 	}
 
-	return Keyword::INVALID;
+	return false;
 };
 
-static std::string KeywordToString(Keyword keyword)
+static Keyword* ToKeyword(std::string representation)
 {
-	return KeywordStrings[(int)keyword];
+	for (auto keyword : keywords)
+	{
+		if (representation == keyword->representation)
+		{
+			return keyword;
+		}
+	}
+
+	return nullptr;
 };

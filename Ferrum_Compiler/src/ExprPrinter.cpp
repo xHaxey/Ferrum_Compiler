@@ -28,7 +28,7 @@ void ExprPrinter::Visit(TypeExp& exp)
 
 	std::cout
 		<< "Type: "
-		<< TypeToString(exp.type)
+		<< exp.type->representation
 		<< std::endl;
 }
 
@@ -38,17 +38,7 @@ void ExprPrinter::Visit(KeywordExp& exp)
 
 	std::cout
 		<< "Keyword: "
-		<< KeywordToString(exp.keyword)
-		<< std::endl;
-}
-
-void ExprPrinter::Visit(OperatorExp& exp)
-{
-	Indent();
-
-	std::cout << "Operator('"
-		<< exp.op
-		<< "')"
+		<< exp.keyword->representation
 		<< std::endl;
 }
 
@@ -58,7 +48,7 @@ void ExprPrinter::Visit(BinaryExp& exp)
 
 	std::cout
 		<< "Binary('"
-		<< BinaryOperatorToString(exp.op)
+		<< exp.op->data.representation
 		<< "')"
 		<< std::endl;
 
@@ -76,7 +66,7 @@ void ExprPrinter::Visit(PreExp& exp)
 
 	std::cout
 		<< "Pre('"
-		<< PreOperatorToString(exp.op)
+		<< exp.op->data.representation
 		<< "')"
 		<< std::endl;
 
@@ -93,13 +83,45 @@ void ExprPrinter::Visit(PostExp& exp)
 
 	std::cout
 		<< "Post('"
-		<< PostOperatorToString(exp.op)
+		<< exp.op->data.representation
 		<< "')"
 		<< std::endl;
 
 	indent++;
 
 	exp.left->Accept(*this);
+
+	indent--;
+}
+
+void ExprPrinter::Visit(BlockExp& exp)
+{
+	Indent();
+
+	std::cout << "Block" << std::endl;
+
+	indent++;
+
+	for (auto& expr : exp.expressions)
+	{
+		expr->Accept(*this);
+	}
+
+	indent--;
+}
+
+void ExprPrinter::Visit(ListExp& exp)
+{
+	Indent();
+
+	std::cout << "List" << std::endl;
+
+	indent++;
+
+	for (auto& expr : exp.expressions)
+	{
+		expr->Accept(*this);
+	}
 
 	indent--;
 }

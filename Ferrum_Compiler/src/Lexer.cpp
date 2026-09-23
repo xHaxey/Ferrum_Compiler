@@ -203,7 +203,11 @@ std::expected<std::unique_ptr<Token>, bool> Lexer::ReadSpecial() noexcept
 		SourceLocation begin = current_location;
 		SourceLocation end = current_location;
 
-		Move();
+		while (IsSpecial() && !IsAtEnd())
+		{
+			end = current_location;
+			Move();
+		}
 
 		auto range = SourceRange::Make(begin, end);
 

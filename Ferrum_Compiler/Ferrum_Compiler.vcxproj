@@ -65,7 +65,6 @@
     <ClCompile Include="src\Lexer.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ExpressionParser.cpp" />
-    <ClCompile Include="src\NodeParser.cpp" />
     <ClCompile Include="src\SourceLocation.cpp" />
     <ClCompile Include="src\SourceManager.cpp" />
     <ClCompile Include="src\SourceRange.cpp" />

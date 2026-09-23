@@ -139,7 +139,7 @@ static Operator multi =
 	}
 };
 
-static Operator div =
+static Operator division =
 {
 	OperatorType::DIV,
 	OperatorData("/", 70, 71),
@@ -353,7 +353,7 @@ static std::vector<Operator*> operators =
 	&neg,
 	&log_not,
 	&multi,
-	&div,
+	&division,
 	&mod,
 	&add,
 	&sub,

@@ -76,9 +76,9 @@ void ExprParser::SkipNewline()
 	}
 }
 
-Type ExprParser::MatchType()
+Type* ExprParser::MatchType()
 {
-	auto type = StringToType(Current()->Text());
+	auto type = ToType(Current()->Text());
 	Move();
 	return type;
 }
@@ -111,41 +111,11 @@ bool ExprParser::IsAtEnd() const noexcept
 	return false;
 }
 
-BinaryOperator ExprParser::GetCurrentBin()
-{
-	return StringToBinaryOperator(Current()->Text());
-}
-
-PreOperator ExprParser::GetCurrentPre()
-{
-	return StringToPreOperator(Current()->Text());
-}
-
-PostOperator ExprParser::GetCurrentPost()
-{
-	return StringToPostOperator(Current()->Text());
-}
-
-bool ExprParser::IsInfix(Token* token)
-{
-	return StringToBinaryOperator(token->Text()) != BinaryOperator::INVALID;
-}
-
-bool ExprParser::IsPrefix(Token* token)
-{
-	return StringToPreOperator(token->Text()) != PreOperator::INVALID;
-}
-
-bool ExprParser::IsPostfix(Token* token)
-{
-	return StringToPostOperator(token->Text()) != PostOperator::INVALID;
-}
-
 std::unique_ptr<Expression> ExprParser::ParseExpression(size_t bindingPower)
 {
 	std::unique_ptr<Expression> expr;
 
-	if (IsPrefix(Current()))
+	if (IsPrefix(Current()->Text()))
 	{
 		expr = ParsePrefix();
 	}
@@ -154,13 +124,13 @@ std::unique_ptr<Expression> ExprParser::ParseExpression(size_t bindingPower)
 		expr = ParseOther();
 	}
 
-	while ((IsInfix(Current()) || IsPostfix(Current())) &&
+	while ((IsInfix(Current()->Text()) || IsPostfix(Current()->Text())) &&
 		expr->exprType != ExprType::TYPE &&
 		expr->exprType != ExprType::KEYWORD)
 	{
-		auto bp = IsInfix(Current()) ? GetPrecedence(GetCurrentBin()) : GetPrecedence(GetCurrentPost());
+		auto bp = IsInfix(Current()->Text()) ? ToInfix(Current()->Text())->data.leftBp: ToPostfix(Current()->Text())->data.leftBp;
 
-		if (bp.leftBp < bindingPower)
+		if (bp < bindingPower)
 		{
 			break;
 		}
@@ -175,23 +145,23 @@ std::unique_ptr<Expression> ExprParser::ParsePrefix()
 {
 	auto opRange = Current()->Range();
 
-	auto op = StringToPreOperator(Advance()->Text());
+	auto op = ToPrefix(Advance()->Text());
 
-	auto right = ParseExpression(GetPrecedence(op).rightBp);
+	auto right = ParseExpression(op->data.rightBp);
 
 	return std::make_unique<PreExp>(ExprType::PRE, op, std::move(right), SourceRange::Merge(opRange, right->range), opRange);
 }
 
 std::unique_ptr<Expression> ExprParser::ParseInfix(std::unique_ptr<Expression> prefix)
 {
-	if (IsPostfix(Current()))
+	if (IsPostfix(Current()->Text()))
 	{
 		return ParsePostfix(std::move(prefix));
 	}
 
-	auto op = StringToBinaryOperator(Advance()->Text());
+	auto op = ToInfix(Advance()->Text());
 
-	auto right = ParseExpression(GetPrecedence(op).rightBp);
+	auto right = ParseExpression(op->data.rightBp);
 
 	return std::make_unique<BinaryExp>(ExprType::BINARY, std::move(prefix), op, std::move(right), SourceRange::Merge(prefix->range, right->range));
 }
@@ -200,7 +170,7 @@ std::unique_ptr<Expression> ExprParser::ParsePostfix(std::unique_ptr<Expression>
 {
 	auto opRange = Current()->Range();
 
-	auto op = StringToPostOperator(Advance()->Text());
+	auto op = ToPostfix(Advance()->Text());
 
 	return std::make_unique<PostExp>(ExprType::POST, std::move(prefix), op, SourceRange::Merge(opRange, prefix->range),opRange);
 }
@@ -240,19 +210,23 @@ std::unique_ptr<Expression> ExprParser::ParseOther()
 	}
 	case TokenType::IDENTIFIER:
 	{
-		return std::make_unique<IdentifierExp>(ExprType::IDENTIFIER, token->Text(), token->Range());
+		if (IsType(token->Text()))
+		{
+			return std::make_unique<TypeExp>(ExprType::TYPE, ToType(token->Text()), token->Range());
+		}
+		else if (IsKeyword(token->Text()))
+		{
+			return std::make_unique<KeywordExp>(ExprType::KEYWORD, ToKeyword(token->Text()), token->Range());
+		}
+		else
+		{
+			return std::make_unique<IdentifierExp>(ExprType::IDENTIFIER, token->Text(), token->Range());
+		}
 	}
-	case TokenType::TYPE:
+	case TokenType::SPECIAL:
 	{
-		return std::make_unique<TypeExp>(ExprType::TYPE, StringToType(token->Text()), token->Range());
-	}
-	case TokenType::KEYWORD:
-	{
-		return std::make_unique<KeywordExp>(ExprType::KEYWORD, StringToKeyword(token->Text()), token->Range());
-	}
-	case TokenType::OPERATOR:
-	{
-		return std::make_unique<OperatorExp>(ExprType::OPERATOR, token->Text(), token->Range());
+		error_queue.Add("Invalid symbol!", token->Range());
+		return std::make_unique<ErrorExp>(ExprType::ERROR, "Invalid symbol!", token->Range());
 	}
 	default:
 	{

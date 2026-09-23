@@ -33,7 +33,7 @@ void SourceErrorQueue::Print()
 
 		marker.append((error.GetRange().StartColumn() - 1) + digits + 3, ' ');
 
-		marker.append(std::max(size_t(1), error.GetRange().EndColumn() - error.GetRange().StartColumn()), '^');
+		marker.append(std::max(size_t(1), error.GetRange().EndColumn() - error.GetRange().StartColumn() + 1), '^');
 
 
 

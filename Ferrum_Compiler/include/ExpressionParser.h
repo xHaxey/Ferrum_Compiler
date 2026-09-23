@@ -2,6 +2,7 @@
 #include "Expressions.h"
 #include "Token.h"
 #include "Type.h"
+#include "Operator.h"
 #include "Keyword.h"
 #include "ErrorQueue.h"
 #include <string>
@@ -25,19 +26,11 @@ private:
 
 	void SkipNewline();
 
-	Type MatchType();
+	Type* MatchType();
 
 	bool Match(std::string string) noexcept;
 	bool Check(std::string string) noexcept;
 	bool IsAtEnd() const noexcept;
-
-	BinaryOperator GetCurrentBin();
-	PreOperator GetCurrentPre();
-	PostOperator GetCurrentPost();
-
-	bool IsInfix(Token* token);
-	bool IsPrefix(Token* token);
-	bool IsPostfix(Token* token);
 
 	std::unique_ptr<Expression> ParseExpression(size_t precedence);
 

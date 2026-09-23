@@ -9,10 +9,8 @@
 	X(BINARY,		"Binary") \
 	X(TYPE,			"Type") \
 	X(KEYWORD,		"Keyword") \
-	X(OPERATOR,		"Operator") \
 	X(PRE,			"Unary Pre") \
 	X(POST,			"Unary Post") \
-	X(INITIALIZER,	"Initializer") \
 	X(VALUE,		"Value") \
 	X(ERROR,		"ERROR")
 
@@ -45,5 +43,5 @@ public:
 
 	ExprType exprType;
 	SourceRange range;
-	Type resolvedType = Type::INVALID;
+	Type* resolvedType = nullptr;
 };
