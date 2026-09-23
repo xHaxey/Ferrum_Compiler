@@ -28,19 +28,15 @@ private:
 	std::expected<std::unique_ptr<Token>, bool> ReadChar() noexcept;
 	std::expected<std::unique_ptr<Token>, bool> ReadString() noexcept;
 	bool ReadComment() noexcept;
-	std::expected<std::unique_ptr<Token>, bool> ReadOperator() noexcept;
+	std::expected<std::unique_ptr<Token>, bool> ReadSpecial() noexcept;
 	std::expected<std::unique_ptr<Token>, bool> ReadNumber() noexcept;
 	std::unique_ptr<Token> ReadIdentifier() noexcept;
 
-	size_t IsOperator() noexcept;
 	bool IsSpecial() noexcept;
-	bool IsCombination() noexcept;
 	bool IsNumber() noexcept;
 	bool IsComment() noexcept;
 	bool IsIdentifierStart() noexcept;
 	bool IsIdentifierChar() noexcept;
-	bool IsType(std::string string) noexcept;
-	bool IsKeyword(std::string string) noexcept;
 
 public:
 	SourceErrorQueue error_queue;

@@ -44,7 +44,7 @@ std::vector<std::unique_ptr<Token>> Lexer::TokenizeSource()
 			continue;
 		}
 
-		auto op = ReadOperator();
+		auto op = ReadSpecial();
 
 		if (op)
 		{
@@ -196,36 +196,18 @@ bool Lexer::ReadComment() noexcept
 	return false;
 }
 
-std::expected<std::unique_ptr<Token>, bool> Lexer::ReadOperator() noexcept
+std::expected<std::unique_ptr<Token>, bool> Lexer::ReadSpecial() noexcept
 {
-	if (size_t chars = IsOperator())
+	if (IsSpecial())
 	{
 		SourceLocation begin = current_location;
 		SourceLocation end = current_location;
 
-		std::string op;
+		Move();
 
-		switch (chars)
-		{
-		case 1:
-		{
-			op += Current();
-			Move();
-			break;
-		}
-		case 2:
-		{
-			op += Current();
-			Move();
-			end = current_location;
-			op += Current();
-			Move();
-			break;
-		}
-		}
 		auto range = SourceRange::Make(begin, end);
 
-		return MakeToken(TokenType::OPERATOR, range);
+		return MakeToken(TokenType::SPECIAL, range);
 	}
 
 	return std::unexpected<bool>(false);
@@ -302,69 +284,12 @@ std::unique_ptr<Token> Lexer::ReadIdentifier() noexcept
 		return MakeToken(TokenType::BOOL, range);
 	}
 
-	if (IsType(string))
-	{
-		return MakeToken(TokenType::TYPE, range);
-	}
-
-	if (IsKeyword(string))
-	{
-		return MakeToken(TokenType::KEYWORD, range);
-	}
-
 	return MakeToken(TokenType::IDENTIFIER, range);
-}
-
-size_t Lexer::IsOperator() noexcept
-{
-	if (IsCombination())
-	{
-		return 2;
-	}
-	if (IsSpecial())
-	{
-		return 1;
-	}
-	return 0;
 }
 
 bool Lexer::IsSpecial() noexcept
 {
 	return special.contains(Current());
-}
-
-bool Lexer::IsCombination() noexcept
-{
-	std::string combination;
-	combination += Current();
-	auto result = Next();
-
-	if (!result)
-	{
-		return false;
-	}
-
-	combination += result.value();
-
-	if (combination == "==" ||
-		combination == "!=" ||
-		combination == "-=" ||
-		combination == "+=" ||
-		combination == "<=" ||
-		combination == ">=" ||
-		combination == "--" ||
-		combination == "++" ||
-		combination == "<<" ||
-		combination == ">>" ||
-		combination == "||" ||
-		combination == "&&" ||
-		combination == "::" ||
-		combination == "->" ||
-		combination == "<-" ||
-		combination == "%=" ||
-		combination == "*=" ||
-		combination == "/=") return true;
-	return false;
 }
 
 bool Lexer::IsNumber() noexcept
@@ -402,14 +327,4 @@ bool Lexer::IsIdentifierStart() noexcept
 bool Lexer::IsIdentifierChar() noexcept
 {
 	return std::isalnum(Current()) || Current() == '_';
-}
-
-bool Lexer::IsType(std::string string) noexcept
-{
-	return StringToType(string) != Type::INVALID;
-}
-
-bool Lexer::IsKeyword(std::string string) noexcept
-{
-	return StringToKeyword(string) != Keyword::INVALID;
 }

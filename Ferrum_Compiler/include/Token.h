@@ -10,10 +10,7 @@
 	X(CHAR,			"<CHAR>") \
 	X(STRING,		"<STRING>") \
 	X(BOOL,			"<BOOL>") \
-	X(TYPE,			"<TYPE>") \
-	X(KEYWORD,		"<KEYWORD>") \
-	X(OPERATOR,		"<OPERATOR>") \
-	X(COMMENT,		"<COMMENT>") \
+	X(SPECIAL,		"<SPECIAL>") \
 	X(IDENTIFIER,	"<IDENTIFIER>") \
 	X(NEWLINE,		"<NEWLINE>") \
 	X(ENDOFFILE,	"<EOF>") \
