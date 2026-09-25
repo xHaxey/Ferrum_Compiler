@@ -12,6 +12,7 @@ public:
     virtual void Visit(class PostExp&) = 0;
     virtual void Visit(class BlockExp&) = 0;
     virtual void Visit(class ListExp&) = 0;
+    virtual void Visit(class CallExp&) = 0;
     virtual void Visit(class ErrorExp&) = 0;
 
     virtual ~ExpressionVisitor() = default;

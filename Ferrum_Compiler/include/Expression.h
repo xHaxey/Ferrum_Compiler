@@ -12,6 +12,9 @@
 	X(PRE,			"Unary Pre") \
 	X(POST,			"Unary Post") \
 	X(VALUE,		"Value") \
+	X(LIST,			"List") \
+	X(BLOCK,		"Block") \
+	X(CALL,			"Call") \
 	X(ERROR,		"ERROR")
 
 enum class ExprType

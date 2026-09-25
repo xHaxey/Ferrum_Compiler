@@ -31,6 +31,7 @@ enum class OperatorType
 	MULTI_ASSIGN,
 	DIV_ASSIGN,
 	MOD_ASSIGN,
+	COLON,
 	CUSTOM,
 	INVALID
 };
@@ -61,7 +62,7 @@ public:
 static Operator post_inc =
 {
 	OperatorType::POST_INC,
-	OperatorData("++", 110, 0),
+	OperatorData("++", 120, 0),
 	{
 		&incInt,
 		&incFloat
@@ -71,7 +72,7 @@ static Operator post_inc =
 static Operator post_dec =
 {
 	OperatorType::POST_DEC,
-	OperatorData("--", 110, 0),
+	OperatorData("--", 120, 0),
 	{
 		&decInt,
 		&decFloat
@@ -81,7 +82,7 @@ static Operator post_dec =
 static Operator pre_inc =
 {
 	OperatorType::PRE_INC,
-	OperatorData("++", 0, 100),
+	OperatorData("++", 0, 110),
 	{
 		&incInt,
 		&incFloat
@@ -91,7 +92,7 @@ static Operator pre_inc =
 static Operator pre_dec =
 {
 	OperatorType::PRE_DEC,
-	OperatorData("--", 0, 100),
+	OperatorData("--", 0, 110),
 	{
 		&decInt,
 		&decFloat
@@ -101,7 +102,7 @@ static Operator pre_dec =
 static Operator pos =
 {
 	OperatorType::POS,
-	OperatorData("+", 0, 90),
+	OperatorData("+", 0, 100),
 	{
 		&posInt,
 		&posFloat
@@ -111,7 +112,7 @@ static Operator pos =
 static Operator neg =
 {
 	OperatorType::NEG,
-	OperatorData("-", 0, 90),
+	OperatorData("-", 0, 100),
 	{
 		&negInt,
 		&negFloat
@@ -121,7 +122,7 @@ static Operator neg =
 static Operator log_not =
 {
 	OperatorType::LOG_NOT,
-	OperatorData("!", 0, 80),
+	OperatorData("!", 0, 90),
 	{
 		&notBool
 	}
@@ -130,7 +131,7 @@ static Operator log_not =
 static Operator multi =
 {
 	OperatorType::MULTI,
-	OperatorData("*", 70, 71),
+	OperatorData("*", 80, 81),
 	{
 		&mulIntInt,
 		&mulIntFloat,
@@ -142,7 +143,7 @@ static Operator multi =
 static Operator division =
 {
 	OperatorType::DIV,
-	OperatorData("/", 70, 71),
+	OperatorData("/", 80, 81),
 	{
 		&divIntInt,
 		&divIntFloat,
@@ -154,7 +155,7 @@ static Operator division =
 static Operator mod =
 {
 	OperatorType::MOD,
-	OperatorData("%", 70, 71),
+	OperatorData("%", 80, 81),
 	{
 		&modIntInt,
 		&modIntFloat,
@@ -166,7 +167,7 @@ static Operator mod =
 static Operator add =
 {
 	OperatorType::ADD,
-	OperatorData("+", 60, 61),
+	OperatorData("+", 70, 71),
 	{
 		&addIntInt,
 		&addIntFloat,
@@ -178,7 +179,7 @@ static Operator add =
 static Operator sub =
 {
 	OperatorType::SUB,
-	OperatorData("-", 60, 61),
+	OperatorData("-", 70, 71),
 	{
 		&subIntInt,
 		&subIntFloat,
@@ -190,7 +191,7 @@ static Operator sub =
 static Operator gr =
 {
 	OperatorType::GR,
-	OperatorData(">", 50, 50),
+	OperatorData(">", 60, 60),
 	{
 		&grIntInt,
 		&grIntFloat,
@@ -202,7 +203,7 @@ static Operator gr =
 static Operator gre =
 {
 	OperatorType::GRE,
-	OperatorData(">=", 50, 50),
+	OperatorData(">=", 60, 60),
 	{
 		&greIntInt,
 		&greIntFloat,
@@ -214,7 +215,7 @@ static Operator gre =
 static Operator ls =
 {
 	OperatorType::LS,
-	OperatorData("<", 50, 50),
+	OperatorData("<", 60, 60),
 	{
 		&lsIntInt,
 		&lsIntFloat,
@@ -226,7 +227,7 @@ static Operator ls =
 static Operator lse =
 {
 	OperatorType::LSE,
-	OperatorData("<=", 50, 50),
+	OperatorData("<=", 60, 60),
 	{
 		&lseIntInt,
 		&lseIntFloat,
@@ -238,7 +239,7 @@ static Operator lse =
 static Operator eq =
 {
 	OperatorType::EQ,
-	OperatorData("==", 40, 40),
+	OperatorData("==", 50, 50),
 	{
 		&eqIntInt,
 		&eqIntFloat,
@@ -250,7 +251,7 @@ static Operator eq =
 static Operator neq =
 {
 	OperatorType::NEQ,
-	OperatorData("!=", 40, 40),
+	OperatorData("!=", 50, 50),
 	{
 		&neqIntInt,
 		&neqIntFloat,
@@ -262,7 +263,7 @@ static Operator neq =
 static Operator log_and =
 {
 	OperatorType::LOG_AND,
-	OperatorData("&&", 30, 30),
+	OperatorData("&&", 40, 40),
 	{
 		&andBoolBool
 	}
@@ -271,7 +272,7 @@ static Operator log_and =
 static Operator log_or =
 {
 	OperatorType::LOG_OR,
-	OperatorData("||", 20, 20),
+	OperatorData("||", 30, 30),
 	{
 		&orBoolBool
 	}
@@ -280,13 +281,13 @@ static Operator log_or =
 static Operator assign =
 {
 	OperatorType::ASSIGN,
-	OperatorData("=", 10, 10)
+	OperatorData("=", 20, 20)
 };
 
 static Operator add_assign =
 {
 	OperatorType::ADD_ASSIGN,
-	OperatorData("+=", 10, 10),
+	OperatorData("+=", 20, 20),
 	{
 		&addIntInt,
 		&addIntFloat,
@@ -298,7 +299,7 @@ static Operator add_assign =
 static Operator sub_assign =
 {
 	OperatorType::SUB_ASSIGN,
-	OperatorData("-=", 10, 10),
+	OperatorData("-=", 20, 20),
 	{
 		&subIntInt,
 		&subIntFloat,
@@ -310,7 +311,7 @@ static Operator sub_assign =
 static Operator multi_assign =
 {
 	OperatorType::MULTI_ASSIGN,
-	OperatorData("*=", 10, 10),
+	OperatorData("*=", 20, 20),
 	{
 		&mulIntInt,
 		&mulIntFloat,
@@ -322,7 +323,7 @@ static Operator multi_assign =
 static Operator div_assign =
 {
 	OperatorType::DIV_ASSIGN,
-	OperatorData("/=", 10, 10),
+	OperatorData("/=", 20, 20),
 	{
 		&divIntInt,
 		&divIntFloat,
@@ -334,13 +335,19 @@ static Operator div_assign =
 static Operator mod_assign =
 {
 	OperatorType::MOD_ASSIGN,
-	OperatorData("%=", 10, 10),
+	OperatorData("%=", 20, 20),
 	{
 		&modIntInt,
 		&modIntFloat,
 		&modFloatInt,
 		&modFloatFloat
 	}
+};
+
+static Operator colon =
+{
+	OperatorType::COLON,
+	OperatorData(":", 10, 10)
 };
 
 static std::vector<Operator*> operators = 
@@ -370,7 +377,8 @@ static std::vector<Operator*> operators =
 	&sub_assign,
 	&multi_assign,
 	&div_assign,
-	&mod_assign
+	&mod_assign,
+	&colon
 };
 
 static bool IsPrefix(std::string representation)

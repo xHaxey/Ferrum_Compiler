@@ -126,6 +126,36 @@ void ExprPrinter::Visit(ListExp& exp)
 	indent--;
 }
 
+void ExprPrinter::Visit(CallExp& exp)
+{
+	Indent();
+
+	std::cout << "Call" << std::endl;
+
+	indent++;
+
+	Indent();
+
+	std::cout << "Calle:" << std::endl;
+
+	indent++;
+
+	exp.calle->Accept(*this);
+
+	indent--;
+
+	Indent();
+
+	std::cout << "Params:" << std::endl;
+
+	indent++;
+
+	exp.params->Accept(*this);
+
+	indent--;
+	indent--;
+}
+
 void ExprPrinter::Visit(ErrorExp& exp)
 {
 	Indent();

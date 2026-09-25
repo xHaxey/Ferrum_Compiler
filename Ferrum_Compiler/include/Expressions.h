@@ -184,6 +184,29 @@ public:
 	}
 };
 
+class CallExp : public Expression
+{
+public:
+	CallExp(
+		ExprType exprType,
+		std::unique_ptr<Expression> calle,
+		std::unique_ptr<Expression> params,
+		SourceRange range
+	) :
+		Expression(range, exprType),
+		calle(std::move(calle)),
+		params(std::move(params))
+	{}
+
+	std::unique_ptr<Expression> calle;
+	std::unique_ptr<Expression> params;
+
+	void Accept(ExpressionVisitor& v) override
+	{
+		v.Visit(*this);
+	}
+};
+
 class ErrorExp : public Expression
 {
 public:

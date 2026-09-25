@@ -17,6 +17,7 @@ public:
     void Visit(class PostExp& exp) override;
     void Visit(class BlockExp&) override;
     void Visit(class ListExp&) override;
+    void Visit(class CallExp&) override;
     void Visit(class ErrorExp& exp) override;
 
 private:

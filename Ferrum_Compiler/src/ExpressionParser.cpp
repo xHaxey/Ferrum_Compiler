@@ -54,7 +54,7 @@ void ExprParser::Move() noexcept
 	}
 }
 
-std::expected<Token*, bool> ExprParser::Expected(std::string expected, std::string error) noexcept
+std::expected<Token*, std::unique_ptr<Expression>> ExprParser::Expected(std::string expected, std::string error) noexcept
 {
 	SkipNewline();
 
@@ -65,7 +65,7 @@ std::expected<Token*, bool> ExprParser::Expected(std::string expected, std::stri
 		return token;
 	}
 	error_queue.Add(error, Current()->Range());
-	return std::unexpected<bool>(false);
+	return std::unexpected<std::unique_ptr<ErrorExp>>(std::make_unique<ErrorExp>(ExprType::ERROR, error, Current()->Range()));
 }
 
 void ExprParser::SkipNewline()
@@ -124,9 +124,18 @@ std::unique_ptr<Expression> ExprParser::ParseExpression(size_t bindingPower)
 		expr = ParseOther();
 	}
 
-	while ((IsInfix(Current()->Text()) || IsPostfix(Current()->Text())) &&
-		expr->exprType != ExprType::TYPE &&
-		expr->exprType != ExprType::KEYWORD)
+	while (Check("[") && !IsAtEnd() && bindingPower != 10)
+	{
+		Advance();
+
+		auto params = ParseList();
+
+		auto range = SourceRange::Merge(expr->range, params->range);
+
+		expr = std::make_unique<CallExp>(ExprType::CALL, std::move(expr), std::move(params), range);
+	}
+
+	while ((IsInfix(Current()->Text()) || IsPostfix(Current()->Text())))
 	{
 		auto bp = IsInfix(Current()->Text()) ? ToInfix(Current()->Text())->data.leftBp: ToPostfix(Current()->Text())->data.leftBp;
 
@@ -228,11 +237,104 @@ std::unique_ptr<Expression> ExprParser::ParseOther()
 		error_queue.Add("Invalid symbol!", token->Range());
 		return std::make_unique<ErrorExp>(ExprType::ERROR, "Invalid symbol!", token->Range());
 	}
+	case TokenType::DELIMITER:
+	{
+		if (token->Text() == "(")
+		{
+			return ParseGroup();
+		}
+		else if (token->Text() == "[")
+		{
+			return ParseList();
+		}
+		else if (token->Text() == "{")
+		{
+			return ParseBlock();
+		}
+		else
+		{
+			error_queue.Add("Invalid symbol!", token->Range());
+			return std::make_unique<ErrorExp>(ExprType::ERROR, "Invalid symbol!", token->Range());
+		}
+	}
 	default:
 	{
 		error_queue.Add("Expected expression!", token->Range());
 		return std::make_unique<ErrorExp>(ExprType::ERROR, "Expected expression!", token->Range());
 	}
 	}
+}
+
+std::unique_ptr<Expression> ExprParser::ParseGroup()
+{
+	auto exp = ParseExpression(0);
+
+	auto result = Expected(")", "Expected end of parenthesis!");
+
+	if (!result)
+	{
+		return std::move(result.error());
+	}
+
+	return exp;
+}
+
+std::unique_ptr<Expression> ExprParser::ParseList()
+{
+	SourceLocation begin = Current()->Range().Begin();
+
+	std::vector<std::unique_ptr<Expression>> expressions;
+
+	while (!Check("]") && !IsAtEnd())
+	{
+		SkipNewline();
+
+		expressions.push_back(ParseExpression(0));
+
+		if (!Match(","))
+		{
+			break;
+		}
+
+		SkipNewline();
+	}
+
+	SourceLocation end = Current()->Range().Begin();
+
+	auto result = Expected("]", "Expected end of brackets!");
+
+	if (!result)
+	{
+		return std::move(result.error());
+	}
+
+	return std::make_unique<ListExp>(ExprType::LIST, std::move(expressions), SourceRange::Make(begin, end));
+}
+
+std::unique_ptr<Expression> ExprParser::ParseBlock()
+{
+	SourceLocation begin = Current()->Range().Begin();
+
+	std::vector<std::unique_ptr<Expression>> expressions;
+
+	while (!Check("}") && !IsAtEnd())
+	{
+		SkipNewline();
+
+		expressions.push_back(ParseExpression(0));
+
+		SkipNewline();
+	}
+
+	SourceLocation end = Current()->Range().Begin();
+
+	auto result = Expected("}", "Expected end of brackets!");
+
+	if (!result)
+	{
+		return std::move(result.error());
+	}
+
+	return std::make_unique<BlockExp>(ExprType::BLOCK, std::move(expressions), SourceRange::Make(begin, end));
 }
 

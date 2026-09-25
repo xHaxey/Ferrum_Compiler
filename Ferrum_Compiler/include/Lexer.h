@@ -10,8 +10,8 @@
 #include <vector>
 #include <memory>
 
-constexpr std::string_view special = "!@#$%^&*-=+\\|;:,.<>/?`~";
-constexpr std::string_view delimiters = "[](){}";
+constexpr std::string_view special = "!@#$%^&*-=+\\.<>/?`~:";
+constexpr std::string_view delimiters = "[](){},|;";
 
 class Lexer
 {

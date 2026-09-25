@@ -22,7 +22,7 @@ private:
 	Token* Advance() noexcept;
 	std::expected<Token*, bool> Next() noexcept;
 	void Move() noexcept;
-	std::expected<Token*, bool> Expected(std::string expected, std::string error) noexcept;
+	std::expected<Token*, std::unique_ptr<Expression>> Expected(std::string expected, std::string error) noexcept;
 
 	void SkipNewline();
 
@@ -39,6 +39,10 @@ private:
 	std::unique_ptr<Expression> ParsePostfix(std::unique_ptr<Expression> prefix);
 
 	std::unique_ptr<Expression> ParseOther();
+
+	std::unique_ptr<Expression> ParseGroup();
+	std::unique_ptr<Expression> ParseList();
+	std::unique_ptr<Expression> ParseBlock();
 
 public:
 	SourceErrorQueue error_queue;
