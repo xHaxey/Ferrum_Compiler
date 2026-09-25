@@ -52,6 +52,14 @@ std::vector<std::unique_ptr<Token>> Lexer::TokenizeSource()
 			continue;
 		}
 
+		auto delimiter = ReadDelimiter();
+
+		if (delimiter)
+		{
+			tokens.push_back(std::move(*delimiter));
+			continue;
+		}
+
 		auto number = ReadNumber();
 
 		if (number)
@@ -217,6 +225,23 @@ std::expected<std::unique_ptr<Token>, bool> Lexer::ReadSpecial() noexcept
 	return std::unexpected<bool>(false);
 }
 
+std::expected<std::unique_ptr<Token>, bool> Lexer::ReadDelimiter() noexcept
+{
+	if (IsDelimiter())
+	{
+		SourceLocation begin = current_location;
+		SourceLocation end = current_location;
+
+		auto range = SourceRange::Make(begin, end);
+
+		Move();
+
+		return MakeToken(TokenType::DELIMITER, range);
+	}
+
+	return std::unexpected<bool>(false);
+}
+
 std::expected<std::unique_ptr<Token>, bool> Lexer::ReadNumber() noexcept
 {
 	if (IsNumber())
@@ -294,6 +319,11 @@ std::unique_ptr<Token> Lexer::ReadIdentifier() noexcept
 bool Lexer::IsSpecial() noexcept
 {
 	return special.contains(Current());
+}
+
+bool Lexer::IsDelimiter() noexcept
+{
+	return delimiters.contains(Current());
 }
 
 bool Lexer::IsNumber() noexcept

@@ -10,7 +10,8 @@
 #include <vector>
 #include <memory>
 
-constexpr std::string_view special = "!@#$%^&*()-=+[]{}\\|;:,.<>/?`~";
+constexpr std::string_view special = "!@#$%^&*-=+\\|;:,.<>/?`~";
+constexpr std::string_view delimiters = "[](){}";
 
 class Lexer
 {
@@ -29,10 +30,12 @@ private:
 	std::expected<std::unique_ptr<Token>, bool> ReadString() noexcept;
 	bool ReadComment() noexcept;
 	std::expected<std::unique_ptr<Token>, bool> ReadSpecial() noexcept;
+	std::expected<std::unique_ptr<Token>, bool> ReadDelimiter() noexcept;
 	std::expected<std::unique_ptr<Token>, bool> ReadNumber() noexcept;
 	std::unique_ptr<Token> ReadIdentifier() noexcept;
 
 	bool IsSpecial() noexcept;
+	bool IsDelimiter() noexcept;
 	bool IsNumber() noexcept;
 	bool IsComment() noexcept;
 	bool IsIdentifierStart() noexcept;
